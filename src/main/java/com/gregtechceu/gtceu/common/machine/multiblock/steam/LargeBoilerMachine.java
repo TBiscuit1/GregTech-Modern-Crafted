@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.gregtechceu.gtceu.utils.FormattingUtil.convertTemperature;
+
 
 /**
  * @author KilaBash
@@ -190,7 +192,7 @@ public class LargeBoilerMachine extends WorkableMultiblockMachine implements IEx
     public void addDisplayText(List<Component> textList) {
         IDisplayUIMachine.super.addDisplayText(textList);
         if (isFormed()){
-            textList.add(Component.translatable("gtceu.multiblock.large_boiler.temperature", (int) (currentTemperature + 274.15), (int) (maxTemperature + 274.15)));
+            textList.add(Component.translatable("gtceu.multiblock.large_boiler.temperature", convertTemperature((int) (currentTemperature + 274.15)), convertTemperature((int) (maxTemperature + 274.15))));
             textList.add(Component.translatable("gtceu.multiblock.large_boiler.steam_output", currentTemperature));
 
             var throttleText = Component.translatable("gtceu.multiblock.large_boiler.throttle",

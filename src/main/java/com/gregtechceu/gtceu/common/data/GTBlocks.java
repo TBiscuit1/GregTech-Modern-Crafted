@@ -129,6 +129,7 @@ public class GTBlocks {
                             MATERIAL_BLOCKS_BUILDER.put(tagPrefix, material, registrate
                                 .block(tagPrefix.idPattern().formatted(material.getName()), properties -> new MaterialBlock(properties, tagPrefix, material))
                                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                                 .properties(p -> tagPrefix.blockProperties().properties().apply(p).noLootTable())
                                 .transform(unificationBlock(tagPrefix, material))
                                 .addLayer(tagPrefix.blockProperties().renderType())
@@ -254,6 +255,7 @@ public class GTBlocks {
     private static void registerCableBlock(Material material, Insulation insulation, GTRegistrate registrate) {
         var entry = registrate.block("%s_%s".formatted(material.getName(), insulation.name), p -> new CableBlock(p, insulation, material))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .properties(p -> p.dynamicShape().noOcclusion().noLootTable())
                 .transform(unificationBlock(insulation.tagPrefix, material))
                 .blockstate(NonNullBiConsumer.noop())
@@ -293,6 +295,7 @@ public class GTBlocks {
     private static void registerFluidPipeBlock(Material material, FluidPipeType fluidPipeType, GTRegistrate registrate) {
         var entry = registrate.block("%s_%s_fluid_pipe".formatted(material.getName(), fluidPipeType.name), p -> new FluidPipeBlock(p, fluidPipeType, material))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .properties(p -> {
                     if (doMetalPipe(material)) {
                         p.sound(GTSoundTypes.METAL_PIPE);
@@ -336,6 +339,7 @@ public class GTBlocks {
     private static void registerItemPipeBlock(Material material, ItemPipeType itemPipeType, GTRegistrate registrate) {
         var entry = registrate.block("%s_%s_item_pipe".formatted(material.getName(), itemPipeType.name), p -> new ItemPipeBlock(p, itemPipeType, material))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .properties(p -> {
                     if (doMetalPipe(material)) {
                         p.sound(GTSoundTypes.METAL_PIPE);
@@ -368,6 +372,7 @@ public class GTBlocks {
         var type = LaserPipeType.values()[slot];
         var entry = REGISTRATE.block("%s_laser_pipe".formatted(type.getSerializedName()), (p) -> new LaserPipeBlock(p, type))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .properties(p -> p.dynamicShape().noOcclusion().noLootTable())
                 .blockstate(NonNullBiConsumer.noop())
                 .defaultLoot()
@@ -392,6 +397,7 @@ public class GTBlocks {
     }
     public static final BlockEntry<LongDistancePipeBlock> LD_ITEM_PIPE = REGISTRATE.block("long_distance_item_pipeline", properties -> new LongDistancePipeBlock(properties, LDItemPipeType.INSTANCE))
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .blockstate(GTModels::longDistanceItemPipeModel)
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_STONE_TOOL)
             .simpleItem()
@@ -399,6 +405,7 @@ public class GTBlocks {
 
     public static final BlockEntry<LongDistancePipeBlock> LD_FLUID_PIPE = REGISTRATE.block("long_distance_fluid_pipeline", properties -> new LongDistancePipeBlock(properties, LDFluidPipeType.INSTANCE))
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .blockstate(GTModels::longDistanceFluidPipeModel)
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE, BlockTags.NEEDS_STONE_TOOL)
             .simpleItem()
@@ -655,6 +662,7 @@ public class GTBlocks {
                                         "side",  GTCEu.id("block/casings/voltage/%s/side".formatted(tierName)))) : null))
                 .lang("%s Machine Casing".formatted(GTValues.VN[tier]))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -678,6 +686,7 @@ public class GTBlocks {
                                         "top_side",  GTCEu.id("block/casings/hermetic_casing/hermetic_casing_overlay"))) : null))
                 .lang("Hermetic Casing %s".formatted(GTValues.LVT[tier]))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -698,6 +707,7 @@ public class GTBlocks {
                                         "top",  GTCEu.id("block/casings/steam/%s/top".formatted(material)),
                                         "side",  GTCEu.id("block/casings/steam/%s/side".formatted(material)))) : null))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -710,6 +720,7 @@ public class GTBlocks {
     private static BlockEntry<CoilBlock> createCoilBlock(ICoilType coilType) {
         BlockEntry<CoilBlock> coilBlock = REGISTRATE.block("%s_coil_block".formatted(coilType.getName()), p -> new CoilBlock(p, coilType))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -731,6 +742,7 @@ public class GTBlocks {
                                                 "side", GTCEu.id("block/casings/battery/" + batteryData.getBatteryName() + "/side"))) :
                                 null))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -746,7 +758,7 @@ public class GTBlocks {
     private static BlockEntry<FusionCasingBlock> createFusionCasing(IFusionCasingType casingType) {
         BlockEntry<FusionCasingBlock> casingBlock = REGISTRATE.block(casingType.getSerializedName(), p -> new FusionCasingBlock(p, casingType))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
-                .properties(properties -> properties.strength(5.0f, 10.0f).sound(SoundType.METAL))
+                .properties(properties -> properties.strength(5.0f, 10.0f).sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), CustomTags.TOOL_TIERS[casingType.getHarvestLevel()])
@@ -763,7 +775,7 @@ public class GTBlocks {
                         Platform.isClient() ? new TextureOverrideRenderer(new ResourceLocation("block/cube_all"),
                             Map.of("all", GTCEu.id("block/casings/cleanroom/" + filterType))) : null))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
-                .properties(properties -> properties.strength(2.0f, 8.0f).sound(SoundType.METAL).isValidSpawn((blockState, blockGetter, blockPos, entityType) -> false))
+                .properties(properties -> properties.strength(2.0f, 8.0f).sound(SoundType.NETHERITE_BLOCK).isValidSpawn((blockState, blockGetter, blockPos, entityType) -> false))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), CustomTags.TOOL_TIERS[1])
@@ -781,6 +793,7 @@ public class GTBlocks {
                         Platform.isClient() ? new CTMModelRenderer(GTCEu.id(baseModelPath)) : null,
                         Platform.isClient() ? new CTMModelRenderer(GTCEu.id("%s_active".formatted(baseModelPath))) : null))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -802,6 +815,7 @@ public class GTBlocks {
                                         "top", type.top(),
                                         "side", type.side())) : null))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
                 .addLayer(() -> RenderType::cutoutMipped)
                 .blockstate(NonNullBiConsumer.noop())
                 .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)

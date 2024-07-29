@@ -43,6 +43,7 @@ public class LongDistanceNetwork {
     protected LongDistanceNetwork(LongDistancePipeType pipeType, WorldData world) {
         this.pipeType = pipeType;
         this.world = world;
+        System.out.println("Created Network");
     }
 
     @Nullable

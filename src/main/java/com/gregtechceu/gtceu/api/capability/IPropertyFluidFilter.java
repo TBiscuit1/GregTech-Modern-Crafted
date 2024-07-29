@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static com.gregtechceu.gtceu.api.fluids.FluidConstants.CRYOGENIC_FLUID_THRESHOLD;
+import static com.gregtechceu.gtceu.utils.FormattingUtil.convertTemperature;
 
 public interface IPropertyFluidFilter extends Predicate<FluidStack> {
 
@@ -80,7 +81,7 @@ public interface IPropertyFluidFilter extends Predicate<FluidStack> {
      */
     default void appendTooltips(@NotNull List<Component> tooltip, boolean showToolsInfo, boolean showTemperatureInfo) {
         if (GTUtil.isShiftDown()) {
-            if (showTemperatureInfo) tooltip.add(Component.translatable("gtceu.fluid_pipe.max_temperature", getMaxFluidTemperature()));
+            if (showTemperatureInfo) tooltip.add(Component.translatable("gtceu.fluid_pipe.max_temperature", convertTemperature(getMaxFluidTemperature())));
             if (isGasProof()) tooltip.add(Component.translatable("gtceu.fluid_pipe.gas_proof"));
             else tooltip.add(Component.translatable("gtceu.fluid_pipe.not_gas_proof"));
             if (isPlasmaProof()) tooltip.add(Component.translatable("gtceu.fluid_pipe.plasma_proof"));

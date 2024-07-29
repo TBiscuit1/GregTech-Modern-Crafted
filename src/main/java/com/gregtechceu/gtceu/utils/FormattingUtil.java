@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.utils;
 
 import com.google.common.base.CaseFormat;
+import com.gregtechceu.gtceu.config.ConfigHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
@@ -175,5 +176,15 @@ public class FormattingUtil {
 
     private static boolean isEmptyComponent(Component component) {
         return component.getContents() == ComponentContents.EMPTY && component.getSiblings().isEmpty();
+    }
+
+    public static String convertTemperature(long temp) {
+        String text;
+        switch (ConfigHolder.INSTANCE.client.temperatureConversion){
+            default -> text = temp + " K";
+            case 1 -> text = (temp + 273) + " °C";
+            case 2 -> text = Math.round(((temp - 273) * 9) / 5.0 + 32) + " K";
+        }
+        return text;
     }
 }

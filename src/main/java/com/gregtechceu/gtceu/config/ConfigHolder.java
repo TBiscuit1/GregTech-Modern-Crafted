@@ -370,6 +370,10 @@ public class ConfigHolder {
         @Configurable.Comment({"Duration of UI animations in ms", "Default: 300"})
         @Configurable.Range(min = 1)
         public int animationTime = 300;
+        @Configurable
+        @Configurable.Comment({"Temperature Type", "0 - Kelvin", "1 - Celsius", "2 - Fahrenheit", "Default: 0"})
+        @Configurable.Range(min = 0, max = 2)
+        public int temperatureConversion = 0;
     }
 
     public static class DeveloperConfigs {

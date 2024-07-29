@@ -46,7 +46,7 @@ public class GCyMBlocks {
                                     "side",  GTCEu.id("block/casings/slicing_blades/side"))) : null))
             .lang("Slicing Blades")
             .initialProperties(() -> Blocks.IRON_BLOCK)
-            .properties(p -> p.sound(SoundType.METAL).mapColor(MapColor.METAL))
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK).mapColor(MapColor.METAL))
             .addLayer(() -> RenderType::cutoutMipped)
             .blockstate(NonNullBiConsumer.noop())
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
@@ -59,6 +59,7 @@ public class GCyMBlocks {
             .block("molybdenum_disilicide_coil_block", Block::new)
             .lang("Molybdenum Disilicide Coil Block")
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
             .item()
             .build()
@@ -68,6 +69,7 @@ public class GCyMBlocks {
             .block("electrolytic_cell", Block::new)
             .lang("Electrolytic Cell")
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
             .simpleItem()
             .register();
@@ -76,6 +78,7 @@ public class GCyMBlocks {
             .block("crushing_wheels", Block::new)
             .lang("Crushing Wheels")
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
             .simpleItem()
             .register();
@@ -84,6 +87,7 @@ public class GCyMBlocks {
             .block("heat_vent", Block::new)
             .lang("Heat Vent")
             .initialProperties(() -> Blocks.IRON_BLOCK)
+            .properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
             .tag(GTToolType.WRENCH.harvestTags.get(0), BlockTags.MINEABLE_WITH_PICKAXE)
             .simpleItem()
             .register();

@@ -912,8 +912,8 @@ public class LangHandler {
         provider.add("gtceu.recipe.amperage", "Amperage: %,d");
         provider.add("gtceu.recipe.not_consumed", "Does not get consumed in the process");
         provider.add("gtceu.recipe.chance", "Chance: %s +%s/tier");
-        provider.add("gtceu.recipe.temperature", "Temperature: %,dK");
-        provider.add("gtceu.recipe.temperature_and_coil", "Temp.: %,dK (%s)");
+        provider.add("gtceu.recipe.temperature", "Temperature: %,d");
+        provider.add("gtceu.recipe.temperature_and_coil", "Temp.: %,d (%s)");
         provider.add("gtceu.recipe.explosive", "Explosive: %s");
         provider.add("gtceu.recipe.eu_to_start", "Energy To Start: %sEU");
         provider.add("gtceu.recipe.dimensions", "Dimensions: %s");
@@ -946,7 +946,7 @@ public class LangHandler {
         provider.add("gtceu.fluid.molten", "Molten %s");
         provider.add("gtceu.fluid.empty", "Empty");
         provider.add("gtceu.fluid.amount", "§9Amount: %d/%d mB");
-        provider.add("gtceu.fluid.temperature", "§cTemperature: %d K");
+        provider.add("gtceu.fluid.temperature", "§cTemperature: %d");
         provider.add("gtceu.fluid.temperature.cryogenic", "§bCryogenic! Handle with care!");
         provider.add("gtceu.fluid.state_gas", "§aState: Gaseous");
         provider.add("gtceu.fluid.state_liquid", "§aState: Liquid");
@@ -1023,7 +1023,7 @@ public class LangHandler {
         provider.add("gtceu.cable.loss_per_block", "Loss/Meter/Ampere: §c%d§7 EU-Volt");
         provider.add("gtceu.cable.superconductor", "§d%s Superconductor");
         provider.add("gtceu.fluid_pipe.capacity", "§9Capacity: §f%d mB");
-        provider.add("gtceu.fluid_pipe.max_temperature", "§cTemperature Limit: §f%d K");
+        provider.add("gtceu.fluid_pipe.max_temperature", "§cTemperature Limit: §f%d");
         provider.add("gtceu.fluid_pipe.channels", "§eChannels: §f%d");
         provider.add("gtceu.fluid_pipe.gas_proof", "§6Can handle Gases");
         provider.add("gtceu.fluid_pipe.acid_proof", "§6Can handle Acids");
@@ -1098,9 +1098,9 @@ public class LangHandler {
         provider.add("gtceu.multiblock.turbine.energy_per_tick_maxed", "Energy Output: %s EU/t");
         provider.add("gtceu.multiblock.turbine.obstructed", "Turbine Face Obstructed");
         provider.add("gtceu.multiblock.turbine.efficiency_tooltip", "Each Rotor Holder above %s§7 adds §f10%% efficiency§7.");
-        provider.add("gtceu.multiblock.large_boiler.max_temperature", "Max Temperature: %dK, Steam Production: %dmB/t");
+        provider.add("gtceu.multiblock.large_boiler.max_temperature", "Max Temperature: %d, Steam Production: %dmB/t");
         provider.add("gtceu.multiblock.large_boiler.efficiency", "Efficiency: %s");
-        provider.add("gtceu.multiblock.large_boiler.temperature", "Temperature: %sK / %sK");
+        provider.add("gtceu.multiblock.large_boiler.temperature", "Temperature: %s / %s");
         provider.add("gtceu.multiblock.large_boiler.steam_output", "Steam Output: %s L/t");
         provider.add("gtceu.multiblock.large_boiler.throttle", "Throttle: %d");
         provider.add("gtceu.multiblock.large_boiler.throttle.tooltip", "Boiler can output less Steam and consume less fuel (efficiency is not lost, does not affect heat-up time)");

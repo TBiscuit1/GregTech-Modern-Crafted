@@ -48,6 +48,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import static com.gregtechceu.gtceu.utils.FormattingUtil.convertTemperature;
+
 /**
  * @author KilaBash
  * @date 2023/3/14
@@ -283,7 +285,7 @@ public abstract class SteamBoilerMachine extends SteamWorkableMachine implements
                 .widget(new ProgressWidget(this::getTemperaturePercent, 96, 26, 10, 54)
                         .setProgressTexture(GuiTextures.PROGRESS_BAR_BOILER_EMPTY.get(isHighPressure), GuiTextures.PROGRESS_BAR_BOILER_HEAT)
                         .setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP)
-                        .setDynamicHoverTips(pct -> I18n.get("gtceu.multiblock.large_boiler.temperature", (int) (currentTemperature + 274.15), (int) (getMaxTemperature() + 274.15))))
+                        .setDynamicHoverTips(pct -> I18n.get("gtceu.multiblock.large_boiler.temperature", convertTemperature((int) (currentTemperature + 274.15)), convertTemperature((int) (getMaxTemperature() + 274.15)))))
                 .widget(new TankWidget(waterTank.storages[0], 83, 26, 10, 54, false, true)
                         .setShowAmount(false)
                         .setFillDirection(ProgressTexture.FillDirection.DOWN_TO_UP)

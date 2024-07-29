@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.gregtechceu.gtceu.utils.FormattingUtil.convertTemperature;
 import static com.lowdragmc.lowdraglib.gui.texture.ProgressTexture.FillDirection.*;
 
 /**
@@ -437,9 +438,9 @@ public class GTRecipeTypes {
                 ICoilType requiredCoil = ICoilType.getMinRequiredType(temp);
 
                 if (requiredCoil == null || requiredCoil.getMaterial() == null) {
-                    return LocalizationUtils.format("gtceu.recipe.temperature", temp);
+                    return LocalizationUtils.format("gtceu.recipe.temperature", convertTemperature(temp));
                 } else {
-                    return LocalizationUtils.format("gtceu.recipe.temperature_and_coil", temp, I18n.get(requiredCoil.getMaterial().getUnlocalizedName()));
+                    return LocalizationUtils.format("gtceu.recipe.temperature_and_coil", convertTemperature(temp), I18n.get(requiredCoil.getMaterial().getUnlocalizedName()));
                 }
             })
             .setUiBuilder((recipe, widgetGroup) -> {

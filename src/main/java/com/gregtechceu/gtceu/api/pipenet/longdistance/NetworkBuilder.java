@@ -51,6 +51,7 @@ public class NetworkBuilder extends Thread {
         checkNetwork(start);
         // iterate over each given starting point and try to build a network
         while (!this.starts.isEmpty()) {
+            System.out.println("Working?");
             start = this.starts.remove(0);
             LongDistanceNetwork ldn = this.worldData.getNetwork(start);
             if (ldn == this.originalNetwork) {

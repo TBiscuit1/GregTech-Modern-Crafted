@@ -99,8 +99,7 @@ import static com.gregtechceu.gtceu.common.data.GTCreativeModeTabs.MACHINE;
 import static com.gregtechceu.gtceu.common.data.GTMaterials.DrillingFluid;
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.DUMMY_RECIPES;
 import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.STEAM_BOILER_RECIPES;
-import static com.gregtechceu.gtceu.utils.FormattingUtil.toEnglishName;
-import static com.gregtechceu.gtceu.utils.FormattingUtil.toRomanNumeral;
+import static com.gregtechceu.gtceu.utils.FormattingUtil.*;
 
 /**
  * @author KilaBash
@@ -942,7 +941,7 @@ public class GTMachines {
             .additionalDisplay((controller, components) -> {
                 if (controller instanceof CoilWorkableElectricMultiblockMachine coilMachine && controller.isFormed()) {
                     components.add(Component.translatable("gtceu.multiblock.blast_furnace.max_temperature",
-                            Component.translatable(FormattingUtil.formatNumbers(coilMachine.getCoilType().getCoilTemperature() + 100L * Math.max(0, coilMachine.getTier() - GTValues.MV)) + "K").setStyle(Style.EMPTY.withColor(ChatFormatting.RED))));
+                            Component.translatable(convertTemperature(coilMachine.getCoilType().getCoilTemperature() + 100L * Math.max(0, coilMachine.getTier() - GTValues.MV))).setStyle(Style.EMPTY.withColor(ChatFormatting.RED))));
                 }
             })
             .compassSections(GTCompassSections.TIER[MV])
@@ -1905,7 +1904,7 @@ public class GTMachines {
                 .recoveryItems(() -> new ItemLike[]{GTItems.MATERIAL_ITEMS.get(TagPrefix.dustTiny, GTMaterials.Ash).get()})
                 .renderer(() -> new LargeBoilerRenderer(texture, firebox, GTCEu.id("block/multiblock/generator/large_%s_boiler".formatted(name))))
                 .tooltips(
-                        Component.translatable("gtceu.multiblock.large_boiler.max_temperature", (int)(maxTemperature + 274.15), maxTemperature),
+                        Component.translatable("gtceu.multiblock.large_boiler.max_temperature", convertTemperature((long)(maxTemperature + 274.15)), convertTemperature(maxTemperature)),
                         Component.translatable("gtceu.multiblock.large_boiler.heat_time_tooltip", maxTemperature / heatSpeed / 20),
                         Component.translatable("gtceu.multiblock.large_boiler.explosion_tooltip").withStyle(ChatFormatting.DARK_RED))
                 .compassSections(GTCompassSections.STEAM)
