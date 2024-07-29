@@ -42,7 +42,7 @@ public class GCyMRecipeTypes {
             .setSlotOverlay(true, true, true, GuiTextures.FURNACE_OVERLAY_2)
             .addDataInfo(data -> {
                 int temp = data.getInt("ebf_temp");
-                return LocalizationUtils.format("gtceu.recipe.temperature", FormattingUtil.formatNumbers(temp));
+                return LocalizationUtils.format("gtceu.recipe.temperature", FormattingUtil.convertTemperature(temp));
             })
             .addDataInfo(data -> {
                 int temp = data.getInt("ebf_temp");

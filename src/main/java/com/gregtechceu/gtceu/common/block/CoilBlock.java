@@ -26,6 +26,8 @@ import java.util.Map;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import static com.gregtechceu.gtceu.utils.FormattingUtil.convertTemperature;
+
 /**
  * @author KilaBash
  * @date 2023/3/4
@@ -52,7 +54,7 @@ public class CoilBlock extends ActiveBlock {
         super.appendHoverText(stack, level, tooltip, flag);
         if (GTUtil.isShiftDown()) {
             int coilTier = coilType.getTier();
-            tooltip.add(Component.translatable("block.gtceu.wire_coil.tooltip_heat", coilType.getCoilTemperature()));
+            tooltip.add(Component.translatable("block.gtceu.wire_coil.tooltip_heat", convertTemperature(coilType.getCoilTemperature())));
             tooltip.add(Component.translatable("block.gtceu.wire_coil.tooltip_smelter"));
             tooltip.add(
                     Component.translatable("block.gtceu.wire_coil.tooltip_parallel_smelter", coilType.getLevel() * 32));

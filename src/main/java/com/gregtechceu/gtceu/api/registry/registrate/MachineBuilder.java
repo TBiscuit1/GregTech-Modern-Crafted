@@ -339,6 +339,7 @@ public class MachineBuilder<DEFINITION extends MachineDefinition> extends Builde
                 .color(() -> () -> IMachineBlock::colorTinted)
                 .initialProperties(() -> Blocks.DISPENSER)
                 .properties(BlockBehaviour.Properties::noLootTable)
+
                 .addLayer(() -> RenderType::cutoutMipped)
                 // .tag(GTToolType.WRENCH.harvestTag)
                 .blockstate(NonNullBiConsumer.noop())

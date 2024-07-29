@@ -192,7 +192,7 @@ public class FormattingUtil {
         switch (ConfigHolder.INSTANCE.client.temperatureConversion){
             default -> text = temp + " K";
             case 1 -> text = (temp + 273) + " °C";
-            case 2 -> text = Math.round(((temp - 273) * 9) / 5.0 + 32) + " K";
+            case 2 -> text = Math.round(((temp - 273) * 9) / 5.0 + 32) + " °F";
         }
         return text;
     }
