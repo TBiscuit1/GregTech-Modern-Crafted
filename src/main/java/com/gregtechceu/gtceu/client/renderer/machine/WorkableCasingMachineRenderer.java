@@ -4,7 +4,9 @@ import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.IWorkable;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
+import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.client.model.WorkableOverlayModel;
+
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelState;
@@ -14,7 +16,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -34,7 +37,7 @@ public class WorkableCasingMachineRenderer extends MachineRenderer {
     }
 
     public WorkableCasingMachineRenderer(ResourceLocation baseCasing, ResourceLocation workableModel, boolean tint) {
-        super(tint ? GTCEu.id("block/tinted_cube_all") : GTCEu.id("block/cube_all"));
+        super(tint ? GTCEu.id("block/cube/tinted/all") : GTCEu.id("block/cube/all"));
         this.overlayModel = new WorkableOverlayModel(workableModel);
         this.baseCasing = baseCasing;
         setTextureOverride(Map.of("all", baseCasing));
@@ -42,12 +45,19 @@ public class WorkableCasingMachineRenderer extends MachineRenderer {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void renderMachine(List<BakedQuad> quads, MachineDefinition definition, @Nullable MetaMachine machine, Direction frontFacing, @Nullable Direction side, RandomSource rand, Direction modelFacing, ModelState modelState) {
+    public void renderMachine(List<BakedQuad> quads, MachineDefinition definition, @Nullable MetaMachine machine,
+                              Direction frontFacing, @Nullable Direction side, RandomSource rand, Direction modelFacing,
+                              ModelState modelState) {
         super.renderMachine(quads, definition, machine, frontFacing, side, rand, modelFacing, modelState);
+        Direction upwardsFacing = Direction.NORTH;
+        if (machine instanceof IMultiController multi) {
+            upwardsFacing = multi.self().getUpwardsFacing();
+        }
         if (machine instanceof IWorkable workable) {
-            quads.addAll(overlayModel.bakeQuads(side, frontFacing, workable.isActive(), workable.isWorkingEnabled()));
+            quads.addAll(overlayModel.bakeQuads(side, frontFacing, upwardsFacing, workable.isActive(),
+                    workable.isWorkingEnabled()));
         } else {
-            quads.addAll(overlayModel.bakeQuads(side, frontFacing, false, false));
+            quads.addAll(overlayModel.bakeQuads(side, frontFacing, upwardsFacing, false, false));
         }
     }
 

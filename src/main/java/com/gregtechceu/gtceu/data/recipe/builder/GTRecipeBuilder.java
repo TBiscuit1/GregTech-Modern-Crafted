@@ -1,33 +1,31 @@
 package com.gregtechceu.gtceu.data.recipe.builder;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper;
+import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.stack.UnificationEntry;
+import com.gregtechceu.gtceu.api.data.medicalcondition.MedicalCondition;
+import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.data.tag.TagUtil;
+import com.gregtechceu.gtceu.api.item.component.IDataItem;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.machine.multiblock.CleanroomType;
-import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.GTRecipeSerializer;
+import com.gregtechceu.gtceu.api.recipe.*;
+import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.api.recipe.ingredient.IntCircuitIngredient;
-import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
-import com.gregtechceu.gtceu.common.recipe.*;
-import com.gregtechceu.gtceu.api.data.chemical.material.Material;
-import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
-import com.gregtechceu.gtceu.api.recipe.RecipeCondition;
-import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
-import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
-import com.lowdragmc.lowdraglib.LDLib;
+import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
+import com.gregtechceu.gtceu.common.recipe.*;
+import com.gregtechceu.gtceu.config.ConfigHolder;
+import com.gregtechceu.gtceu.utils.ResearchManager;
+
 import com.lowdragmc.lowdraglib.Platform;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.utils.NBTToJsonConverter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -40,14 +38,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @SuppressWarnings("unchecked")
 @ParametersAreNonnullByDefault
@@ -59,6 +67,7 @@ public class GTRecipeBuilder {
     public final Map<RecipeCapability<?>, List<Content>> tickInput = new HashMap<>();
     public final Map<RecipeCapability<?>, List<Content>> output = new HashMap<>();
     public final Map<RecipeCapability<?>, List<Content>> tickOutput = new HashMap<>();
+    @NotNull
     public CompoundTag data = new CompoundTag();
     public final List<RecipeCondition> conditions = new ArrayList<>();
     @Setter
@@ -81,6 +90,9 @@ public class GTRecipeBuilder {
     public boolean isFuel = false;
     @Setter
     public BiConsumer<GTRecipeBuilder, Consumer<FinishedRecipe>> onSave;
+    @Getter
+    private final Collection<ResearchRecipeEntry> researchRecipeEntries = new ArrayList<>();
+    private boolean generatingRecipes = true;
 
     public GTRecipeBuilder(ResourceLocation id, GTRecipeType recipeType) {
         this.id = id;
@@ -105,7 +117,7 @@ public class GTRecipeBuilder {
     }
 
     public static GTRecipeBuilder ofRaw() {
-        return new GTRecipeBuilder(GTCEu.id("raw"), null);
+        return new GTRecipeBuilder(GTCEu.id("raw"), GTRecipeTypes.DUMMY_RECIPES);
     }
 
     public GTRecipeBuilder copy(String id) {
@@ -189,18 +201,54 @@ public class GTRecipeBuilder {
         return output(EURecipeCapability.CAP, eu);
     }
 
+    public GTRecipeBuilder inputCWU(int cwu) {
+        return input(CWURecipeCapability.CAP, cwu);
+    }
+
+    public GTRecipeBuilder CWUt(int cwu) {
+        var lastPerTick = perTick;
+        perTick = true;
+        if (cwu > 0) {
+            tickInput.remove(CWURecipeCapability.CAP);
+            inputCWU(cwu);
+        } else if (cwu < 0) {
+            tickOutput.remove(CWURecipeCapability.CAP);
+            outputCWU(cwu);
+        }
+        perTick = lastPerTick;
+        return this;
+    }
+
+    public GTRecipeBuilder totalCWU(int cwu) {
+        this.durationIsTotalCWU(true);
+        this.hideDuration(true);
+        this.duration(cwu);
+        return this;
+    }
+
+    public GTRecipeBuilder outputCWU(int cwu) {
+        return output(CWURecipeCapability.CAP, cwu);
+    }
+
     public GTRecipeBuilder inputItems(Ingredient... inputs) {
         return input(ItemRecipeCapability.CAP, inputs);
+    }
+
+    public GTRecipeBuilder inputItems(ItemStack input) {
+        if (input.isEmpty()) {
+            GTCEu.LOGGER.error("gt recipe {} input items is empty", id);
+        }
+        return input(ItemRecipeCapability.CAP, SizedIngredient.create(input));
     }
 
     public GTRecipeBuilder inputItems(ItemStack... inputs) {
         for (ItemStack itemStack : inputs) {
             if (itemStack.isEmpty()) {
                 GTCEu.LOGGER.error("gt recipe {} input items is empty", id);
-                throw new IllegalArgumentException(id + ": input items is empty");
             }
         }
-        return input(ItemRecipeCapability.CAP, Arrays.stream(inputs).map(SizedIngredient::create).toArray(Ingredient[]::new));
+        return input(ItemRecipeCapability.CAP,
+                Arrays.stream(inputs).map(SizedIngredient::create).toArray(Ingredient[]::new));
     }
 
     public GTRecipeBuilder inputItems(TagKey<Item> tag, int amount) {
@@ -268,14 +316,21 @@ public class GTRecipeBuilder {
         return outputItems(unificationEntry.tagPrefix, unificationEntry.material, count);
     }
 
+    public GTRecipeBuilder outputItems(ItemStack output) {
+        if (output.isEmpty()) {
+            GTCEu.LOGGER.error("gt recipe {} output items is empty", id);
+        }
+        return output(ItemRecipeCapability.CAP, SizedIngredient.create(output));
+    }
+
     public GTRecipeBuilder outputItems(ItemStack... outputs) {
         for (ItemStack itemStack : outputs) {
             if (itemStack.isEmpty()) {
                 GTCEu.LOGGER.error("gt recipe {} output items is empty", id);
-                throw new IllegalArgumentException(id + ": output items is empty");
             }
         }
-        return output(ItemRecipeCapability.CAP, Arrays.stream(outputs).map(SizedIngredient::create).toArray(Ingredient[]::new));
+        return output(ItemRecipeCapability.CAP,
+                Arrays.stream(outputs).map(SizedIngredient::create).toArray(Ingredient[]::new));
     }
 
     public GTRecipeBuilder outputItems(Item input, int amount) {
@@ -325,7 +380,7 @@ public class GTRecipeBuilder {
         this.chance = lastChance;
         return this;
     }
-    
+
     public GTRecipeBuilder notConsumable(Item item) {
         float lastChance = this.chance;
         this.chance = 0;
@@ -341,11 +396,24 @@ public class GTRecipeBuilder {
         this.chance = lastChance;
         return this;
     }
-    
+
     public GTRecipeBuilder notConsumable(TagPrefix orePrefix, Material material) {
         float lastChance = this.chance;
         this.chance = 0;
         inputItems(orePrefix, material);
+        this.chance = lastChance;
+        return this;
+    }
+
+    public GTRecipeBuilder notConsumableFluid(FluidStack fluid) {
+        chancedInput(fluid, 0, 0);
+        return this;
+    }
+
+    public GTRecipeBuilder notConsumableFluid(FluidIngredient ingredient) {
+        float lastChance = this.chance;
+        this.chance = 0;
+        inputFluids(ingredient);
         this.chance = lastChance;
         return this;
     }
@@ -406,12 +474,21 @@ public class GTRecipeBuilder {
         return chancedOutput(ChemicalHelper.get(tag, mat, count), chance, tierChanceBoost);
     }
 
+    public GTRecipeBuilder inputFluids(FluidStack input) {
+        return input(FluidRecipeCapability.CAP, FluidIngredient.of(
+                TagUtil.createFluidTag(BuiltInRegistries.FLUID.getKey(input.getFluid()).getPath()), input.getAmount()));
+    }
+
     public GTRecipeBuilder inputFluids(FluidStack... inputs) {
         return input(FluidRecipeCapability.CAP, Arrays.stream(inputs).map(fluid -> {
-            if (!Platform.isForge() && fluid.getFluid() == Fluids.WATER) { // Special case for fabric, because there all fluids have to be tagged as water to function as water when placed.
+            if (!Platform.isForge() && fluid.getFluid() == Fluids.WATER) { // Special case for fabric, because there all
+                                                                           // fluids have to be tagged as water to
+                                                                           // function as water when placed.
                 return FluidIngredient.of(fluid);
             } else {
-                return FluidIngredient.of(TagUtil.createFluidTag(BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath()), fluid.getAmount());
+                return FluidIngredient.of(
+                        TagUtil.createFluidTag(BuiltInRegistries.FLUID.getKey(fluid.getFluid()).getPath()),
+                        fluid.getAmount());
             }
         }).toArray(FluidIngredient[]::new));
     }
@@ -420,8 +497,13 @@ public class GTRecipeBuilder {
         return input(FluidRecipeCapability.CAP, inputs);
     }
 
+    public GTRecipeBuilder outputFluids(FluidStack output) {
+        return output(FluidRecipeCapability.CAP, FluidIngredient.of(output));
+    }
+
     public GTRecipeBuilder outputFluids(FluidStack... outputs) {
-        return output(FluidRecipeCapability.CAP, Arrays.stream(outputs).map(FluidIngredient::of).toArray(FluidIngredient[]::new));
+        return output(FluidRecipeCapability.CAP,
+                Arrays.stream(outputs).map(FluidIngredient::of).toArray(FluidIngredient[]::new));
     }
 
     public GTRecipeBuilder outputFluids(FluidIngredient... outputs) {
@@ -437,7 +519,7 @@ public class GTRecipeBuilder {
     }
 
     //////////////////////////////////////
-    //**********     DATA    ***********//
+    // ********** DATA ***********//
     //////////////////////////////////////
     public GTRecipeBuilder addData(String key, Tag data) {
         this.data.put(key, data);
@@ -474,15 +556,15 @@ public class GTRecipeBuilder {
     }
 
     public GTRecipeBuilder explosivesAmount(int explosivesAmount) {
-        return addData("explosives_amount", explosivesAmount);
+        return inputItems(new ItemStack(Blocks.TNT, explosivesAmount));
     }
 
     public GTRecipeBuilder explosivesType(ItemStack explosivesType) {
-        return addData("explosives_type", explosivesType.save(new CompoundTag()));
+        return inputItems(explosivesType);
     }
 
     public GTRecipeBuilder solderMultiplier(int multiplier) {
-        return addData("solderMultiplier", multiplier);
+        return addData("solder_multiplier", multiplier);
     }
 
     public GTRecipeBuilder disableDistilleryRecipes(boolean flag) {
@@ -493,8 +575,20 @@ public class GTRecipeBuilder {
         return addData("eu_to_start", eu);
     }
 
+    public GTRecipeBuilder researchScan(boolean isScan) {
+        return addData("scan_for_research", isScan);
+    }
+
+    public GTRecipeBuilder durationIsTotalCWU(boolean durationIsTotalCWU) {
+        return addData("duration_is_total_cwu", durationIsTotalCWU);
+    }
+
+    public GTRecipeBuilder hideDuration(boolean hideDuration) {
+        return addData("hide_duration", hideDuration);
+    }
+
     //////////////////////////////////////
-    //*******     CONDITIONS    ********//
+    // ******* CONDITIONS ********//
     //////////////////////////////////////
 
     public GTRecipeBuilder cleanroom(CleanroomType cleanroomType) {
@@ -549,6 +643,94 @@ public class GTRecipeBuilder {
         return rpm(rpm, false);
     }
 
+    public GTRecipeBuilder environmentalHazard(MedicalCondition condition, boolean reverse) {
+        return addCondition(new EnvironmentalHazardCondition(condition).setReverse(reverse));
+    }
+
+    public GTRecipeBuilder environmentalHazard(MedicalCondition condition) {
+        return environmentalHazard(condition, false);
+    }
+
+    private boolean applyResearchProperty(ResearchData.ResearchEntry researchEntry) {
+        if (!ConfigHolder.INSTANCE.machines.enableResearch) return false;
+        if (researchEntry == null) {
+            GTCEu.LOGGER.error("Research Entry cannot be empty.", new IllegalArgumentException());
+            return false;
+        }
+
+        if (!generatingRecipes) {
+            GTCEu.LOGGER.error("Cannot generate recipes when using researchWithoutRecipe()",
+                    new IllegalArgumentException());
+            return false;
+        }
+
+        ResearchCondition condition = this.conditions.stream().filter(ResearchCondition.class::isInstance).findAny()
+                .map(ResearchCondition.class::cast).orElse(null);
+        if (condition != null) {
+            condition.data.add(researchEntry);
+        } else {
+            condition = new ResearchCondition();
+            condition.data.add(researchEntry);
+            this.addCondition(condition);
+        }
+        return true;
+    }
+
+    /**
+     * Does not generate a research recipe.
+     *
+     * @param researchId the researchId for the recipe
+     * @return this
+     */
+    public GTRecipeBuilder researchWithoutRecipe(@NotNull String researchId) {
+        return researchWithoutRecipe(researchId, ResearchManager.getDefaultScannerItem());
+    }
+
+    /**
+     * Does not generate a research recipe.
+     *
+     * @param researchId the researchId for the recipe
+     * @param dataStack  the stack to hold the data. Must have the {@link IDataItem} behavior.
+     * @return this
+     */
+    public GTRecipeBuilder researchWithoutRecipe(@NotNull String researchId, @NotNull ItemStack dataStack) {
+        applyResearchProperty(new ResearchData.ResearchEntry(researchId, dataStack));
+        this.generatingRecipes = false;
+        return this;
+    }
+
+    /**
+     * Generates a research recipe for the Scanner.
+     */
+    public GTRecipeBuilder scannerResearch(UnaryOperator<ResearchRecipeBuilder.ScannerRecipeBuilder> research) {
+        ResearchRecipeEntry entry = research.apply(new ResearchRecipeBuilder.ScannerRecipeBuilder()).build();
+        if (applyResearchProperty(new ResearchData.ResearchEntry(entry.researchId, entry.dataStack))) {
+            this.researchRecipeEntries.add(entry);
+        }
+        return this;
+    }
+
+    /**
+     * Generates a research recipe for the Scanner. All values are defaults other than the research stack.
+     *
+     * @param researchStack the stack to use for research
+     * @return this
+     */
+    public GTRecipeBuilder scannerResearch(@NotNull ItemStack researchStack) {
+        return scannerResearch(b -> b.researchStack(researchStack));
+    }
+
+    /**
+     * Generates a research recipe for the Research Station.
+     */
+    public GTRecipeBuilder stationResearch(UnaryOperator<ResearchRecipeBuilder.StationRecipeBuilder> research) {
+        ResearchRecipeEntry entry = research.apply(new ResearchRecipeBuilder.StationRecipeBuilder()).build();
+        if (applyResearchProperty(new ResearchData.ResearchEntry(entry.researchId, entry.dataStack))) {
+            this.researchRecipeEntries.add(entry);
+        }
+        return this;
+    }
+
     public void toJson(JsonObject json) {
         json.addProperty("type", recipeType.registryName.toString());
         json.addProperty("duration", Math.abs(duration));
@@ -588,6 +770,7 @@ public class GTRecipeBuilder {
 
     public FinishedRecipe build() {
         return new FinishedRecipe() {
+
             @Override
             public void serializeRecipeData(JsonObject pJson) {
                 toJson(pJson);
@@ -621,15 +804,23 @@ public class GTRecipeBuilder {
         if (onSave != null) {
             onSave.accept(this, consumer);
         }
+        ResearchCondition condition = this.conditions.stream().filter(ResearchCondition.class::isInstance).findAny()
+                .map(ResearchCondition.class::cast).orElse(null);
+        if (condition != null) {
+            for (ResearchData.ResearchEntry entry : condition.data) {
+                this.recipeType.addDataStickEntry(entry.getResearchId(), buildRawRecipe());
+            }
+        }
         consumer.accept(build());
     }
 
     public GTRecipe buildRawRecipe() {
-        return new GTRecipe(recipeType, id, input, output, tickInput, tickOutput, conditions, data, duration, isFuel);
+        return new GTRecipe(recipeType, id.withPrefix(recipeType.registryName.getPath() + "/"), input, output,
+                tickInput, tickOutput, conditions, List.of(), data, duration, isFuel);
     }
 
     //////////////////////////////////////
-    //*******     Quick Query    *******//
+    // ******* Quick Query *******//
     //////////////////////////////////////
     public long EUt() {
         if (!tickInput.containsKey(EURecipeCapability.CAP)) return 0;
@@ -638,7 +829,27 @@ public class GTRecipeBuilder {
     }
 
     public int getSolderMultiplier() {
-        return Math.max(1, data.getInt("solderMultiplier"));
+        if (data.contains("solderMultiplier")) {
+            return Math.max(1, data.getInt("solderMultiplier"));
+        }
+        return Math.max(1, data.getInt("solder_multiplier"));
     }
 
+    /**
+     * An entry for an autogenerated research recipe for producing a data item containing research data.
+     * 
+     * @param researchId    the id of the research to store
+     * @param researchStack the stack to scan for research
+     * @param dataStack     the stack to contain the data
+     * @param duration      the duration of the recipe
+     * @param EUt           the EUt of the recipe
+     * @param CWUt          how much computation per tick this recipe needs if in Research Station
+     */
+    public record ResearchRecipeEntry(
+                                      @NotNull String researchId,
+                                      @NotNull ItemStack researchStack,
+                                      @NotNull ItemStack dataStack,
+                                      int duration,
+                                      int EUt,
+                                      int CWUt) {}
 }

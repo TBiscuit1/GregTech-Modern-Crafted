@@ -9,15 +9,16 @@ import java.util.function.Supplier;
  */
 public class SupplierMemoizer {
 
-    public static <T> Supplier<T> memoize(Supplier<T> delegate) {
+    public static <T> MemoizedSupplier<T> memoize(Supplier<T> delegate) {
         return new MemoizedSupplier<>(delegate);
     }
 
-    public static <T extends Block> Supplier<T> memoizeBlockSupplier(Supplier<T> delegate) {
+    public static <T extends Block> MemoizedBlockSupplier<T> memoizeBlockSupplier(Supplier<T> delegate) {
         return new MemoizedBlockSupplier<>(delegate);
     }
 
     public static class MemoizedSupplier<T> implements Supplier<T> {
+
         transient T value;
         transient volatile boolean initialized;
         final Supplier<T> delegate;
@@ -42,17 +43,24 @@ public class SupplierMemoizer {
             return value;
         }
 
+        public void forget() {
+            synchronized (this) {
+                initialized = false;
+                value = null;
+            }
+        }
+
         @Override
         public String toString() {
-            return "SupplierMemoizer.memoize("
-                + (initialized ? "<supplier that returned " + value + ">" : delegate)
-                + ")";
+            return "SupplierMemoizer.memoize(" + (initialized ? "<supplier that returned " + value + ">" : delegate) +
+                    ")";
         }
     }
 
     /**
      * A variant of the memoized supplier that stores a block explicitly.
-     * Use this to save blocks to {@link com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper#registerUnificationItems(com.gregtechceu.gtceu.api.data.chemical.material.stack.UnificationEntry, Supplier[])}
+     * Use this to save blocks to
+     * {@link com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper#registerUnificationItems(com.gregtechceu.gtceu.api.data.chemical.material.stack.UnificationEntry, Supplier[])}
      */
     public static class MemoizedBlockSupplier<T extends Block> extends MemoizedSupplier<T> {
 
@@ -62,9 +70,8 @@ public class SupplierMemoizer {
 
         @Override
         public String toString() {
-            return "SupplierMemoizer.memoizeBlockSupplier("
-                + (initialized ? "<supplier that returned " + value + ">" : delegate)
-                + ")";
+            return "SupplierMemoizer.memoizeBlockSupplier(" +
+                    (initialized ? "<supplier that returned " + value + ">" : delegate) + ")";
         }
     }
 }

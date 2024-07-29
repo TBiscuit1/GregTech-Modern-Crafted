@@ -2,38 +2,51 @@ package com.gregtechceu.gtceu.api.item;
 
 import com.gregtechceu.gtceu.api.capability.GTCapabilityHelper;
 import com.gregtechceu.gtceu.api.capability.IElectricItem;
+import com.gregtechceu.gtceu.api.item.capability.ElectricItem;
 import com.gregtechceu.gtceu.api.item.component.*;
 import com.gregtechceu.gtceu.api.item.component.forge.IComponentCapability;
+
 import com.lowdragmc.lowdraglib.client.renderer.IItemRendererProvider;
 import com.lowdragmc.lowdraglib.client.renderer.IRenderer;
 import com.lowdragmc.lowdraglib.gui.factory.HeldItemUIFactory;
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import lombok.Getter;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+
+import com.google.common.collect.Multimap;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * @author KilaBash
@@ -42,7 +55,8 @@ import java.util.List;
  */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUIHolder, IItemRendererProvider {
+public class ComponentItem extends Item
+                           implements HeldItemUIFactory.IHeldItemUIHolder, IItemRendererProvider, IComponentItem {
 
     protected int burnTime = -1;
 
@@ -56,6 +70,11 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
 
     public static ComponentItem create(Item.Properties properties) {
         return new ComponentItem(properties);
+    }
+
+    public void attachComponents(IItemComponent component) {
+        this.components.add(component);
+        component.onAttached(this);
     }
 
     public void attachComponents(IItemComponent... components) {
@@ -78,7 +97,8 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents,
+                                TooltipFlag isAdvanced) {
         for (IItemComponent component : components) {
             if (component instanceof IAddInformation addInformation) {
                 addInformation.appendHoverText(stack, level, tooltipComponents, isAdvanced);
@@ -130,6 +150,49 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
     }
 
     @Override
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
+        for (IItemComponent component : components) {
+            if (component instanceof IItemAttributes itemAttributes) {
+                var result = itemAttributes.getAttributeModifiers(slot, stack);
+                if (result != null && !result.isEmpty()) {
+                    return result;
+                }
+            }
+        }
+        return super.getAttributeModifiers(slot, stack);
+    }
+
+    @Override
+    public boolean isEnchantable(ItemStack stack) {
+        for (IItemComponent component : components) {
+            if (component instanceof IEnchantableItem enchantableItem) {
+                return enchantableItem.isEnchantable(stack);
+            }
+        }
+        return super.isEnchantable(stack);
+    }
+
+    @Override
+    public int getEnchantmentValue(ItemStack stack) {
+        for (IItemComponent component : components) {
+            if (component instanceof IEnchantableItem enchantableItem) {
+                return enchantableItem.getEnchantmentValue(stack);
+            }
+        }
+        return super.getEnchantmentValue(stack);
+    }
+
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        for (IItemComponent component : components) {
+            if (component instanceof IEnchantableItem enchantableItem) {
+                return enchantableItem.canApplyAtEnchantingTable(stack, enchantment);
+            }
+        }
+        return super.canApplyAtEnchantingTable(stack, enchantment);
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         for (IItemComponent component : components) {
             if (component instanceof IInteractionItem interactionItem) {
@@ -149,7 +212,17 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
                 stack = interactionItem.finishUsingItem(stack, level, livingEntity);
             }
         }
-        return super.finishUsingItem(stack, level, livingEntity);
+        return stack;
+    }
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        for (IItemComponent component : components) {
+            if (component instanceof IInteractionItem interactionItem) {
+                return interactionItem.getUseAnimation(stack);
+            }
+        }
+        return super.getUseAnimation(stack);
     }
 
     @Override
@@ -166,7 +239,8 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand usedHand) {
+    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget,
+                                                  InteractionHand usedHand) {
         for (IItemComponent component : components) {
             if (component instanceof IInteractionItem interactionItem) {
                 var result = interactionItem.interactLivingEntity(stack, player, interactionTarget, usedHand);
@@ -179,10 +253,37 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
     }
 
     @Override
+    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        boolean result = false;
+        for (IItemComponent component : components) {
+            if (component instanceof IInteractionItem interactionItem) {
+                result |= interactionItem.hurtEnemy(stack, target, attacker);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        for (IItemComponent component : components) {
+            if (component instanceof ICustomDescriptionId customDescriptionId) {
+                Component name = customDescriptionId.getItemName(stack);
+                if (name != null) {
+                    return name;
+                }
+            }
+        }
+        return super.getName(stack);
+    }
+
+    @Override
     public String getDescriptionId(ItemStack stack) {
         for (IItemComponent component : components) {
             if (component instanceof ICustomDescriptionId customDescriptionId) {
-                return customDescriptionId.getItemStackDisplayName(stack);
+                String langId = customDescriptionId.getItemDescriptionId(stack);
+                if (langId != null) {
+                    return langId;
+                }
             }
         }
         return super.getDescriptionId(stack);
@@ -239,7 +340,8 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
         return super.hasCraftingRemainingItem(stack);
     }
 
-    public <T> LazyOptional<T> getCapability(@Nonnull final ItemStack itemStack, @Nonnull final Capability<T> cap) {
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull final ItemStack itemStack, @NotNull final Capability<T> cap) {
         for (IItemComponent component : components) {
             if (component instanceof IComponentCapability componentCapability) {
                 var value = componentCapability.getCapability(itemStack, cap);
@@ -256,12 +358,52 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
         return burnTime;
     }
 
+    @Override
+    public @Nullable FoodProperties getFoodProperties(ItemStack stack, @Nullable LivingEntity entity) {
+        for (IItemComponent component : components) {
+            if (component instanceof IEdibleItem foodBehavior) {
+                return foodBehavior.getFoodProperties(stack, entity);
+            }
+        }
+        return super.getFoodProperties(stack, entity);
+    }
+
+    @Override
+    public boolean isEdible() {
+        for (IItemComponent component : components) {
+            if (component instanceof IEdibleItem foodBehavior) {
+                return foodBehavior.isEdible();
+            }
+        }
+        return super.isEdible();
+    }
+
+    @Override
+    public SoundEvent getEatingSound() {
+        for (IItemComponent component : components) {
+            if (component instanceof IEdibleItem foodBehavior) {
+                return foodBehavior.getEatingSound();
+            }
+        }
+        return super.getEatingSound();
+    }
+
+    @Override
+    public SoundEvent getDrinkingSound() {
+        for (IItemComponent component : components) {
+            if (component instanceof IEdibleItem foodBehavior) {
+                return foodBehavior.getDrinkingSound();
+            }
+        }
+        return super.getDrinkingSound();
+    }
+
     public void burnTime(int burnTime) {
         this.burnTime = burnTime;
     }
 
     /**
-     * Attempts to get an fully charged variant of this electric item
+     * Attempts to get a fully charged variant of this electric item
      *
      * @param chargeAmount amount of charge
      * @return charged electric item stack
@@ -274,6 +416,16 @@ public class ComponentItem extends Item implements HeldItemUIFactory.IHeldItemUI
             throw new IllegalStateException("Not an electric item.");
         }
         electricItem.charge(chargeAmount, Integer.MAX_VALUE, true, false);
+        return itemStack;
+    }
+
+    public ItemStack getInfiniteChargedStack() {
+        ItemStack itemStack = getDefaultInstance();
+        IElectricItem iElectricItem = GTCapabilityHelper.getElectricItem(itemStack);
+        if (!(iElectricItem instanceof ElectricItem electricItem)) {
+            throw new IllegalStateException("Not a supported electric item.");
+        }
+        electricItem.setInfiniteCharge(true);
         return itemStack;
     }
 }

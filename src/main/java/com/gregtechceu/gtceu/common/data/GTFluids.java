@@ -6,10 +6,11 @@ import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
 import com.gregtechceu.gtceu.api.data.chemical.material.registry.MaterialRegistry;
 import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys;
 import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate;
+
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import static com.gregtechceu.gtceu.common.registry.GTRegistration.REGISTRATE;
 
@@ -37,17 +38,17 @@ public class GTFluids {
         }
     }
 
-    public static void handleNonMaterialFluids(@Nonnull Material material, @Nonnull Fluid fluid) {
+    public static void handleNonMaterialFluids(@NotNull Material material, @NotNull Fluid fluid) {
         var property = material.getProperty(PropertyKey.FLUID);
         property.getStorage().store(FluidStorageKeys.LIQUID, () -> fluid, null);
         // TODO TOOLTIPS
-//        List<String> tooltip = new ArrayList<>();
-//        if (!material.getChemicalFormula().isEmpty()) {
-//            tooltip.add(TextFormatting.YELLOW + material.getChemicalFormula());
-//        }
-//        tooltip.add(LocalizationUtils.format("gtceu.fluid.temperature", property.getFluidTemperature()));
-//        tooltip.add(LocalizationUtils.format(property.getFluidType().getUnlocalizedTooltip()));
-//        tooltip.addAll(property.getFluidType().getAdditionalTooltips());
-//        FluidTooltipUtil.registerTooltip(fluid, tooltip);
+        // List<String> tooltip = new ArrayList<>();
+        // if (!material.getChemicalFormula().isEmpty()) {
+        // tooltip.add(TextFormatting.YELLOW + material.getChemicalFormula());
+        // }
+        // tooltip.add(LocalizationUtils.format("gtceu.fluid.temperature", property.getFluidTemperature()));
+        // tooltip.add(LocalizationUtils.format(property.getFluidType().getUnlocalizedTooltip()));
+        // tooltip.addAll(property.getFluidType().getAdditionalTooltips());
+        // FluidTooltipUtil.registerTooltip(fluid, tooltip);
     }
 }

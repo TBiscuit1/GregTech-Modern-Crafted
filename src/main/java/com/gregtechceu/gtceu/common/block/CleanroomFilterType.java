@@ -2,9 +2,9 @@ package com.gregtechceu.gtceu.common.block;
 
 import com.gregtechceu.gtceu.api.block.IFilterType;
 import com.gregtechceu.gtceu.api.machine.multiblock.CleanroomType;
-import lombok.Getter;
 
-import javax.annotation.Nonnull;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 public enum CleanroomFilterType implements IFilterType {
 
@@ -20,16 +20,15 @@ public enum CleanroomFilterType implements IFilterType {
         this.cleanroomType = cleanroomType;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public String getSerializedName() {
         return this.name;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public String toString() {
         return getSerializedName();
     }
-
 }

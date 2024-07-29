@@ -2,7 +2,7 @@ package com.gregtechceu.gtceu.api.machine.feature;
 
 import net.minecraft.core.Direction;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author KilaBash
@@ -29,7 +29,8 @@ public interface IRedstoneSignalMachine extends IMachineFeature {
 
     /**
      * Call to update output signal.
-     * also see {@link IRedstoneSignalMachine#getOutputSignal(Direction)} and {@link IRedstoneSignalMachine#getOutputDirectSignal(Direction)}
+     * also see {@link IRedstoneSignalMachine#getOutputSignal(Direction)} and
+     * {@link IRedstoneSignalMachine#getOutputDirectSignal(Direction)}
      */
     default void updateSignal() {
         var level = self().getLevel();
@@ -37,5 +38,4 @@ public interface IRedstoneSignalMachine extends IMachineFeature {
             self().notifyBlockUpdate();
         }
     }
-
 }

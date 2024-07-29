@@ -2,21 +2,25 @@ package com.gregtechceu.gtceu.integration.rei.multipage;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
-import com.gregtechceu.gtceu.common.data.GTMachines;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
+import com.gregtechceu.gtceu.common.data.GTMachines;
+
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.rei.IGui2Renderer;
 import com.lowdragmc.lowdraglib.rei.ModularUIDisplayCategory;
+
+import net.minecraft.network.chat.Component;
+
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 public class MultiblockInfoDisplayCategory extends ModularUIDisplayCategory<MultiblockInfoDisplay> {
-    public static final CategoryIdentifier<MultiblockInfoDisplay> CATEGORY = CategoryIdentifier.of(new ResourceLocation(GTCEu.MOD_ID + ":multiblock_info"));
+
+    public static final CategoryIdentifier<MultiblockInfoDisplay> CATEGORY = CategoryIdentifier
+            .of(GTCEu.id("multiblock_info"));
     private final Renderer icon;
 
     public MultiblockInfoDisplayCategory() {
@@ -41,12 +45,12 @@ public class MultiblockInfoDisplayCategory extends ModularUIDisplayCategory<Mult
 
     @Override
     public int getDisplayHeight() {
-        return 176 + 8;
+        return 160 + 8;
     }
 
     @Override
     public int getDisplayWidth(MultiblockInfoDisplay display) {
-        return 176 + 8;
+        return 160 + 8;
     }
 
     @Override
@@ -63,5 +67,4 @@ public class MultiblockInfoDisplayCategory extends ModularUIDisplayCategory<Mult
     public Renderer getIcon() {
         return icon;
     }
-
 }

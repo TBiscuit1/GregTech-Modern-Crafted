@@ -1,18 +1,19 @@
 package com.gregtechceu.gtceu.api.capability;
 
-import com.gregtechceu.gtceu.api.capability.forge.GTCapability;
-import com.gregtechceu.gtceu.api.capability.forge.GTEnergyHelperImpl;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMaintenanceMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.IEnergyStorage;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author KilaBash
@@ -20,15 +21,15 @@ import javax.annotation.Nullable;
  * @implNote EnergyContainerHelper
  */
 public class GTCapabilityHelper {
+
     @Nullable
     public static IElectricItem getElectricItem(ItemStack itemStack) {
         return itemStack.getCapability(GTCapability.CAPABILITY_ELECTRIC_ITEM).resolve().orElse(null);
     }
 
     @Nullable
-    public static IPlatformEnergyStorage getPlatformEnergyItem(ItemStack itemStack) {
-        IEnergyStorage energyItemStorage = itemStack.getCapability(ForgeCapabilities.ENERGY).resolve().orElse(null);
-        return energyItemStorage == null ? null : GTEnergyHelperImpl.toPlatformEnergyStorage(energyItemStorage);
+    public static IEnergyStorage getForgeEnergyItem(ItemStack itemStack) {
+        return itemStack.getCapability(ForgeCapabilities.ENERGY).resolve().orElse(null);
     }
 
     @Nullable
@@ -67,12 +68,11 @@ public class GTCapabilityHelper {
     }
 
     @Nullable
-    public static IPlatformEnergyStorage getPlatformEnergy(Level level, BlockPos pos, @Nullable Direction side) {
+    public static IEnergyStorage getForgeEnergy(Level level, BlockPos pos, @Nullable Direction side) {
         if (level.getBlockState(pos).hasBlockEntity()) {
             var blockEntity = level.getBlockEntity(pos);
             if (blockEntity != null) {
-                IEnergyStorage energyStorage = blockEntity.getCapability(ForgeCapabilities.ENERGY, side).orElse(null);
-                return energyStorage == null ? null : GTEnergyHelperImpl.toPlatformEnergyStorage(energyStorage);
+                return blockEntity.getCapability(ForgeCapabilities.ENERGY, side).orElse(null);
             }
         }
         return null;
@@ -94,7 +94,24 @@ public class GTCapabilityHelper {
     }
 
     @Nullable
-    private static <T> T getBlockEntityCapability(Capability<T> capability, Level level, BlockPos pos, @Nullable Direction side) {
+    public static IOpticalComputationProvider getOpticalComputationProvider(Level level, BlockPos pos,
+                                                                            @Nullable Direction side) {
+        return getBlockEntityCapability(GTCapability.CAPABILITY_COMPUTATION_PROVIDER, level, pos, side);
+    }
+
+    @Nullable
+    public static IDataAccessHatch getDataAccess(Level level, BlockPos pos, @Nullable Direction side) {
+        return getBlockEntityCapability(GTCapability.CAPABILITY_DATA_ACCESS, level, pos, side);
+    }
+
+    @Nullable
+    public static IHazardParticleContainer getHazardContainer(Level level, BlockPos pos, @Nullable Direction side) {
+        return getBlockEntityCapability(GTCapability.CAPABILITY_HAZARD_CONTAINER, level, pos, side);
+    }
+
+    @Nullable
+    private static <T> T getBlockEntityCapability(Capability<T> capability, Level level, BlockPos pos,
+                                                  @Nullable Direction side) {
         if (level.getBlockState(pos).hasBlockEntity()) {
             var blockEntity = level.getBlockEntity(pos);
             if (blockEntity != null) {
@@ -102,5 +119,10 @@ public class GTCapabilityHelper {
             }
         }
         return null;
+    }
+
+    @Nullable
+    public static IMedicalConditionTracker getMedicalConditionTracker(@NotNull Entity entity) {
+        return entity.getCapability(GTCapability.CAPABILITY_MEDICAL_CONDITION_TRACKER, null).resolve().orElse(null);
     }
 }

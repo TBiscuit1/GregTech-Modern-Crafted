@@ -4,10 +4,10 @@ import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.addon.AddonFinder;
 import com.gregtechceu.gtceu.api.addon.IGTAddon;
-import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.recipe.RecipeCondition;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.common.recipe.*;
+
 import net.minecraftforge.fml.ModLoader;
 
 /**
@@ -30,12 +30,16 @@ public final class GTRecipeConditions {
         GTRegistries.RECIPE_CONDITIONS.register(ThunderCondition.INSTANCE.getType(), ThunderCondition.class);
         GTRegistries.RECIPE_CONDITIONS.register(VentCondition.INSTANCE.getType(), VentCondition.class);
         GTRegistries.RECIPE_CONDITIONS.register(CleanroomCondition.INSTANCE.getType(), CleanroomCondition.class);
+        GTRegistries.RECIPE_CONDITIONS.register(ResearchCondition.INSTANCE.getType(), ResearchCondition.class);
+        GTRegistries.RECIPE_CONDITIONS.register(EnvironmentalHazardCondition.INSTANCE.getType(),
+                EnvironmentalHazardCondition.class);
         if (GTCEu.isCreateLoaded()) {
             GTRegistries.RECIPE_CONDITIONS.register(RPMCondition.INSTANCE.getType(), RPMCondition.class);
         }
 
         AddonFinder.getAddons().forEach(IGTAddon::registerRecipeConditions);
-        ModLoader.get().postEvent(new GTCEuAPI.RegisterEvent<>(GTRegistries.RECIPE_CONDITIONS, (Class<Class<? extends RecipeCondition>>) RecipeCondition.class.getClass()));
+        ModLoader.get().postEvent(new GTCEuAPI.RegisterEvent<>(GTRegistries.RECIPE_CONDITIONS,
+                (Class<Class<? extends RecipeCondition>>) RecipeCondition.class.getClass()));
         GTRegistries.RECIPE_CONDITIONS.freeze();
     }
 }

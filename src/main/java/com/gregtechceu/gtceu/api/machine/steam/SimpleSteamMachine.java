@@ -18,31 +18,36 @@ import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.common.recipe.VentCondition;
+
 import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
-import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import com.lowdragmc.lowdraglib.utils.Position;
-import lombok.Setter;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import com.google.common.collect.Tables;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import java.util.*;
+
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.List;
-import java.util.Map;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaustVentMachine, IMachineModifyDrops, IUIMachine {
+public class SimpleSteamMachine extends SteamWorkableMachine
+                                implements IExhaustVentMachine, IMachineModifyDrops, IUIMachine {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(SimpleSteamMachine.class, SteamWorkableMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(SimpleSteamMachine.class,
+            SteamWorkableMachine.MANAGED_FIELD_HOLDER);
 
     @Persisted
     public final NotifiableItemStackHandler importItems;
@@ -59,7 +64,7 @@ public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaust
     }
 
     //////////////////////////////////////
-    //*****     Initialization     *****//
+    // ***** Initialization *****//
     //////////////////////////////////////
 
     @Override
@@ -95,7 +100,7 @@ public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaust
     }
 
     //////////////////////////////////////
-    //******     Venting Logic    ******//
+    // ****** Venting Logic ******//
     //////////////////////////////////////
 
     @Override
@@ -119,11 +124,11 @@ public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaust
     }
 
     //////////////////////////////////////
-    //******     Recipe Logic     ******//
+    // ****** Recipe Logic ******//
     //////////////////////////////////////
 
     @Nullable
-    public static GTRecipe recipeModifier(MetaMachine machine, @Nonnull GTRecipe recipe) {
+    public static GTRecipe recipeModifier(MetaMachine machine, @NotNull GTRecipe recipe) {
         if (machine instanceof SimpleSteamMachine steamMachine) {
             if (RecipeHelper.getRecipeEUtTier(recipe) > GTValues.LV || !steamMachine.checkVenting()) {
                 return null;
@@ -150,20 +155,33 @@ public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaust
     }
 
     //////////////////////////////////////
-    //***********     GUI    ***********//
+    // *********** GUI ***********//
     //////////////////////////////////////
 
     @Override
     public ModularUI createUI(Player entityPlayer) {
-        var group = getRecipeType().getRecipeUI().createUITemplate(recipeLogic::getProgressPercent, importItems.storage, exportItems.storage, IFluidTransfer.EMPTY, IFluidTransfer.EMPTY, true, isHighPressure);
-        Position pos = new Position((Math.max(group.getSize().width + 4 + 8, 176) - 4 - group.getSize().width) / 2 + 4, 32);
+        var storages = Tables.newCustomTable(new EnumMap<>(IO.class), LinkedHashMap<RecipeCapability<?>, Object>::new);
+        storages.put(IO.IN, ItemRecipeCapability.CAP, importItems.storage);
+        storages.put(IO.OUT, ItemRecipeCapability.CAP, exportItems.storage);
+
+        var group = getRecipeType().getRecipeUI().createUITemplate(recipeLogic::getProgressPercent,
+                storages,
+                new CompoundTag(),
+                Collections.emptyList(),
+                true,
+                isHighPressure);
+        Position pos = new Position((Math.max(group.getSize().width + 4 + 8, 176) - 4 - group.getSize().width) / 2 + 4,
+                32);
         group.setSelfPosition(pos);
         return new ModularUI(176, 166, this, entityPlayer)
                 .background(GuiTextures.BACKGROUND_STEAM.get(isHighPressure))
                 .widget(group)
                 .widget(new LabelWidget(5, 5, getBlockState().getBlock().getDescriptionId()))
-                .widget(new PredicatedImageWidget(pos.x + group.getSize().width / 2 - 9, pos.y + group.getSize().height / 2 - 9, 18, 18, GuiTextures.INDICATOR_NO_STEAM.get(isHighPressure))
+                .widget(new PredicatedImageWidget(pos.x + group.getSize().width / 2 - 9,
+                        pos.y + group.getSize().height / 2 - 9, 18, 18,
+                        GuiTextures.INDICATOR_NO_STEAM.get(isHighPressure))
                         .setPredicate(recipeLogic::isWaiting))
-                .widget(UITemplate.bindPlayerInventory(entityPlayer.getInventory(), GuiTextures.SLOT_STEAM.get(isHighPressure), 7, 84, true));
+                .widget(UITemplate.bindPlayerInventory(entityPlayer.getInventory(),
+                        GuiTextures.SLOT_STEAM.get(isHighPressure), 7, 84, true));
     }
 }

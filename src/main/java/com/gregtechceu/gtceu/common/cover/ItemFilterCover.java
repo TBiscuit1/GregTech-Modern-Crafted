@@ -7,6 +7,7 @@ import com.gregtechceu.gtceu.api.cover.IUICover;
 import com.gregtechceu.gtceu.api.cover.filter.ItemFilter;
 import com.gregtechceu.gtceu.api.gui.widget.EnumSelectorWidget;
 import com.gregtechceu.gtceu.common.cover.data.ItemFilterMode;
+
 import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
@@ -14,9 +15,11 @@ import com.lowdragmc.lowdraglib.side.item.ItemTransferHelper;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-import lombok.Getter;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Direction;
+
+import lombok.Getter;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -29,10 +32,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 public class ItemFilterCover extends CoverBehavior implements IUICover {
 
-    public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ItemFilterCover.class, CoverBehavior.MANAGED_FIELD_HOLDER);
+    public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(ItemFilterCover.class,
+            CoverBehavior.MANAGED_FIELD_HOLDER);
 
     protected ItemFilter itemFilter;
-    @Persisted @DescSynced @Getter
+    @Persisted
+    @DescSynced
+    @Getter
     protected ItemFilterMode filterMode = ItemFilterMode.FILTER_INSERT;
 
     public ItemFilterCover(CoverDefinition definition, ICoverable coverHolder, Direction attachedSide) {
@@ -61,7 +67,7 @@ public class ItemFilterCover extends CoverBehavior implements IUICover {
         final var group = new WidgetGroup(0, 0, 176, 85);
         group.addWidget(new LabelWidget(7, 5, attachItem.getDescriptionId()));
         group.addWidget(new EnumSelectorWidget<>(7, 61, 18, 18,
-                ItemFilterMode.VALUES, ItemFilterMode.FILTER_INSERT, this::setFilterMode));
+                ItemFilterMode.VALUES, filterMode, this::setFilterMode));
         group.addWidget(getItemFilter().openConfigurator(30, 25));
         return group;
     }

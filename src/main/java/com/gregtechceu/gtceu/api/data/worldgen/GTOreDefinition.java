@@ -1,13 +1,26 @@
 package com.gregtechceu.gtceu.api.data.worldgen;
 
-import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.worldgen.generator.IndicatorGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.generator.VeinGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.generator.indicators.SurfaceIndicatorGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.generator.veins.*;
 import com.gregtechceu.gtceu.api.data.worldgen.ores.OreVeinUtil;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
-import com.gregtechceu.gtceu.config.ConfigHolder;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
+
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -17,20 +30,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.Tolerate;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.VerticalAnchor;
-import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,80 +39,96 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 /**
  * @author Screret
  * @date 2023/6/14
  * @implNote GTOreDefinition
  */
+@SuppressWarnings("unused")
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 @Accessors(chain = true, fluent = true)
 public class GTOreDefinition {
+
     public static final Codec<GTOreDefinition> CODEC = ResourceLocation.CODEC
             .flatXmap(rl -> Optional.ofNullable(GTRegistries.ORE_VEINS.get(rl))
-                            .map(DataResult::success)
-                            .orElseGet(() -> DataResult.error(() -> "No GTOreDefinition with id " + rl + " registered")),
+                    .map(DataResult::success)
+                    .orElseGet(() -> DataResult.error(() -> "No GTOreDefinition with id " + rl + " registered")),
                     obj -> Optional.ofNullable(GTRegistries.ORE_VEINS.getKey(obj))
                             .map(DataResult::success)
                             .orElseGet(() -> DataResult.error(() -> "GTOreDefinition " + obj + " not registered")));
     public static final Codec<GTOreDefinition> FULL_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                    Codec.INT.fieldOf("cluster_size").forGetter(ft -> ft.clusterSize),
+                    IntProvider.NON_NEGATIVE_CODEC.fieldOf("cluster_size").forGetter(ft -> ft.clusterSize),
                     Codec.floatRange(0.0F, 1.0F).fieldOf("density").forGetter(ft -> ft.density),
                     Codec.INT.fieldOf("weight").forGetter(ft -> ft.weight),
                     IWorldGenLayer.CODEC.fieldOf("layer").forGetter(ft -> ft.layer),
-                    ResourceKey.codec(Registries.DIMENSION).listOf().fieldOf("dimension_filter").forGetter(ft -> new ArrayList<>(ft.dimensionFilter)),
+                    ResourceKey.codec(Registries.DIMENSION).listOf().fieldOf("dimension_filter")
+                            .forGetter(ft -> new ArrayList<>(ft.dimensionFilter)),
                     HeightRangePlacement.CODEC.fieldOf("height_range").forGetter(ft -> ft.range),
-                    Codec.floatRange(0.0F, 1.0F).fieldOf("discard_chance_on_air_exposure").forGetter(ft -> ft.discardChanceOnAirExposure),
-                    RegistryCodecs.homogeneousList(Registries.BIOME).optionalFieldOf("biomes", null).forGetter(ext -> ext.biomes == null ? null : ext.biomes.get()),
-                    BiomeWeightModifier.CODEC.optionalFieldOf("weight_modifier", null).forGetter(ext -> ext.biomeWeightModifier),
+                    Codec.floatRange(0.0F, 1.0F).fieldOf("discard_chance_on_air_exposure")
+                            .forGetter(ft -> ft.discardChanceOnAirExposure),
+                    RegistryCodecs.homogeneousList(Registries.BIOME).optionalFieldOf("biomes", HolderSet.direct())
+                            .forGetter(ext -> ext.biomes == null ? HolderSet.direct() : ext.biomes.get()),
+                    BiomeWeightModifier.CODEC.optionalFieldOf("weight_modifier", BiomeWeightModifier.EMPTY)
+                            .forGetter(ext -> ext.biomeWeightModifier),
                     VeinGenerator.DIRECT_CODEC.fieldOf("generator").forGetter(ft -> ft.veinGenerator),
-                    Codec.list(IndicatorGenerator.DIRECT_CODEC).fieldOf("indicators").forGetter(ft -> ft.indicatorGenerators)
-            ).apply(instance, (clusterSize, density, weight, layer, dimensionFilter, range, discardChanceOnAirExposure, biomes, biomeWeightModifier, veinGenerator, indicatorGenerators) ->
-                    new GTOreDefinition(clusterSize, density, weight, layer, new HashSet<>(dimensionFilter), range, discardChanceOnAirExposure, biomes == null ? null : () -> biomes, biomeWeightModifier, veinGenerator, indicatorGenerators))
-    );
+                    Codec.list(IndicatorGenerator.DIRECT_CODEC).fieldOf("indicators")
+                            .forGetter(ft -> ft.indicatorGenerators))
+                    .apply(instance,
+                            (clusterSize, density, weight, layer, dimensionFilter, range, discardChanceOnAirExposure,
+                             biomes, biomeWeightModifier, veinGenerator, indicatorGenerators) -> new GTOreDefinition(
+                                     clusterSize, density, weight, layer, new HashSet<>(dimensionFilter), range,
+                                     discardChanceOnAirExposure, biomes == null ? HolderSet::direct : () -> biomes,
+                                     biomeWeightModifier, veinGenerator, indicatorGenerators)));
 
     private final InferredProperties inferredProperties = new InferredProperties();
 
     @Getter
-    private int clusterSize;
+    private IntProvider clusterSize;
     @Getter
     private float density;
     @Getter
     private int weight;
     @Getter
     private IWorldGenLayer layer;
-    @Getter @Setter
+    @Getter
+    @Setter
     private Set<ResourceKey<Level>> dimensionFilter;
-    @Getter @Setter
+    @Getter
+    @Setter
     private HeightRangePlacement range;
-    @Getter @Setter
+    @Getter
+    @Setter
     private float discardChanceOnAirExposure;
     @Getter
     private Supplier<HolderSet<Biome>> biomes;
-    @Getter @Setter
-    private BiomeWeightModifier biomeWeightModifier;
+    @Getter
+    @Setter
+    private BiomeWeightModifier biomeWeightModifier = BiomeWeightModifier.EMPTY;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private VeinGenerator veinGenerator;
 
-    @Getter @Setter
-    private List<IndicatorGenerator> indicatorGenerators;
-
-    @Getter @Setter
-    private int minimumYield, maximumYield, depletedYield, depletionChance, depletionAmount = 1;
+    @Getter
     @Setter
-    private List<Map.Entry<Integer, Material>> bedrockVeinMaterial;
+    private List<IndicatorGenerator> indicatorGenerators;
 
     public GTOreDefinition(GTOreDefinition other) {
         this(
                 other.clusterSize, other.density, other.weight, other.layer,
                 Set.copyOf(other.dimensionFilter), other.range, other.discardChanceOnAirExposure,
-                other.biomes, other.biomeWeightModifier, other.veinGenerator, List.copyOf(other.indicatorGenerators)
-        );
+                other.biomes, other.biomeWeightModifier, other.veinGenerator, List.copyOf(other.indicatorGenerators));
     }
 
-    public GTOreDefinition(int clusterSize, float density, int weight, IWorldGenLayer layer, Set<ResourceKey<Level>> dimensionFilter, HeightRangePlacement range, float discardChanceOnAirExposure, @Nullable Supplier<HolderSet<Biome>> biomes, @Nullable BiomeWeightModifier biomeWeightModifier, @Nullable VeinGenerator veinGenerator, @Nullable List<IndicatorGenerator> indicatorGenerators) {
+    public GTOreDefinition(IntProvider clusterSize, float density, int weight, IWorldGenLayer layer,
+                           Set<ResourceKey<Level>> dimensionFilter, HeightRangePlacement range,
+                           float discardChanceOnAirExposure, @Nullable Supplier<HolderSet<Biome>> biomes,
+                           @Nullable BiomeWeightModifier biomeWeightModifier, @Nullable VeinGenerator veinGenerator,
+                           @Nullable List<IndicatorGenerator> indicatorGenerators) {
         this.clusterSize = clusterSize;
         this.density = density;
         this.weight = weight;
@@ -123,8 +140,6 @@ public class GTOreDefinition {
         this.biomeWeightModifier = biomeWeightModifier;
         this.veinGenerator = veinGenerator;
         this.indicatorGenerators = Objects.requireNonNullElseGet(indicatorGenerators, ArrayList::new);
-
-        recomputeBedrockOres();
     }
 
     @HideFromJS
@@ -132,31 +147,23 @@ public class GTOreDefinition {
         GTRegistries.ORE_VEINS.registerOrOverride(id, this);
     }
 
-    private void recomputeBedrockOres() {
-        this.maximumYield = (int) (density * 100) * clusterSize;
-        this.minimumYield = this.maximumYield / 7;
-        this.depletedYield = (int) (clusterSize / density / 10);
-        this.depletionChance = (int) (weight * density / 5);
+    public GTOreDefinition clusterSize(IntProvider clusterSize) {
+        this.clusterSize = clusterSize;
+        return this;
     }
 
     public GTOreDefinition clusterSize(int clusterSize) {
-        this.clusterSize = clusterSize;
-        recomputeBedrockOres();
-
+        this.clusterSize = ConstantInt.of(clusterSize);
         return this;
     }
 
     public GTOreDefinition density(float density) {
         this.density = density;
-        recomputeBedrockOres();
-
         return this;
     }
 
     public GTOreDefinition weight(int weight) {
         this.weight = weight;
-        recomputeBedrockOres();
-
         return this;
     }
 
@@ -165,7 +172,6 @@ public class GTOreDefinition {
         if (this.dimensionFilter == null || this.dimensionFilter.isEmpty()) {
             dimensions(layer.getLevels().toArray(ResourceLocation[]::new));
         }
-
         return this;
     }
 
@@ -266,11 +272,30 @@ public class GTOreDefinition {
         return this;
     }
 
+    public GTOreDefinition classicVeinGenerator(Consumer<ClassicVeinGenerator> config) {
+        var veinGenerator = new ClassicVeinGenerator(this);
+
+        config.accept(veinGenerator);
+        this.veinGenerator = veinGenerator;
+
+        return this;
+    }
+
+    public GTOreDefinition cuboidVeinGenerator(Consumer<CuboidVeinGenerator> config) {
+        var veinGenerator = new CuboidVeinGenerator(this);
+
+        config.accept(veinGenerator);
+        this.veinGenerator = veinGenerator;
+
+        return this;
+    }
+
     @Tolerate
     @Nullable
     public VeinGenerator veinGenerator(ResourceLocation id) {
         if (veinGenerator == null) {
-            veinGenerator = WorldGeneratorUtils.VEIN_GENERATOR_FUNCTIONS.containsKey(id) ? WorldGeneratorUtils.VEIN_GENERATOR_FUNCTIONS.get(id).apply(this) : null;
+            veinGenerator = WorldGeneratorUtils.VEIN_GENERATOR_FUNCTIONS.containsKey(id) ?
+                    WorldGeneratorUtils.VEIN_GENERATOR_FUNCTIONS.get(id).apply(this) : null;
         }
         return veinGenerator;
     }
@@ -280,7 +305,8 @@ public class GTOreDefinition {
         return this;
     }
 
-    private <T extends IndicatorGenerator> T getOrCreateIndicatorGenerator(Class<T> indicatorClass, Function<GTOreDefinition, T> constructor) {
+    private <T extends IndicatorGenerator> T getOrCreateIndicatorGenerator(Class<T> indicatorClass,
+                                                                           Function<GTOreDefinition, T> constructor) {
         var existingGenerator = indicatorGenerators.stream()
                 .filter(indicatorClass::isInstance)
                 .map(indicatorClass::cast)
@@ -294,19 +320,8 @@ public class GTOreDefinition {
         return generator;
     }
 
-    @HideFromJS
-    public List<Map.Entry<Integer, Material>> getBedrockVeinMaterials() {
-        if (bedrockVeinMaterial == null) {
-            if (ConfigHolder.INSTANCE.machines.doBedrockOres) {
-                bedrockVeinMaterial = this.veinGenerator().getValidMaterialsChances();
-            } else {
-                bedrockVeinMaterial = List.of();
-            }
-        }
-        return bedrockVeinMaterial;
-    }
-
     private static class InferredProperties {
+
         public Pair<Integer, Integer> heightRange = null;
     }
 }

@@ -3,6 +3,7 @@ package com.gregtechceu.gtceu.api.data.worldgen.bedrockfluid;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.data.worldgen.WorldGeneratorUtils;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -16,10 +17,12 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.SavedData;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Objects;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * @author KilaBash
@@ -29,6 +32,7 @@ import java.util.Objects;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BedrockFluidVeinSavedData extends SavedData {
+
     public static final int VEIN_CHUNK_SIZE = 8; // veins are 8x8 chunk squares
     public static final int MAXIMUM_VEIN_OPERATIONS = 100_000;
     public final HashMap<ChunkPos, FluidVeinWorldEntry> veinFluids = new HashMap<>();
@@ -39,7 +43,8 @@ public class BedrockFluidVeinSavedData extends SavedData {
     private final ServerLevel serverLevel;
 
     public static BedrockFluidVeinSavedData getOrCreate(ServerLevel serverLevel) {
-        return serverLevel.getDataStorage().computeIfAbsent(tag -> new BedrockFluidVeinSavedData(serverLevel, tag), () -> new BedrockFluidVeinSavedData(serverLevel), "gtceu_bedrock_fluid");
+        return serverLevel.getDataStorage().computeIfAbsent(tag -> new BedrockFluidVeinSavedData(serverLevel, tag),
+                () -> new BedrockFluidVeinSavedData(serverLevel), "gtceu_bedrock_fluid");
     }
 
     public BedrockFluidVeinSavedData(ServerLevel serverLevel) {
@@ -49,11 +54,10 @@ public class BedrockFluidVeinSavedData extends SavedData {
     public BedrockFluidVeinSavedData(ServerLevel serverLevel, CompoundTag nbt) {
         this(serverLevel);
         var list = nbt.getList("veinInfo", Tag.TAG_COMPOUND);
-        for (Tag tag : list) {
-            if (tag instanceof CompoundTag compoundTag) {
-                var chunkPos = new ChunkPos(compoundTag.getLong("p"));
-                veinFluids.put(chunkPos, FluidVeinWorldEntry.readFromNBT(compoundTag.getCompound("d")));
-            }
+        for (int i = 0; i < list.size(); ++i) {
+            CompoundTag compoundTag = list.getCompound(i);
+            var chunkPos = new ChunkPos(compoundTag.getLong("p"));
+            veinFluids.put(chunkPos, FluidVeinWorldEntry.readFromNBT(compoundTag.getCompound("d")));
         }
     }
 
@@ -78,16 +82,22 @@ public class BedrockFluidVeinSavedData extends SavedData {
      * @return The FluidVeinWorldInfo corresponding with the given chunk
      */
     public FluidVeinWorldEntry getFluidVeinWorldEntry(int chunkX, int chunkZ) {
-        if (!veinFluids.containsKey(new ChunkPos(chunkX, chunkZ))) {
+        ChunkPos pos = new ChunkPos(chunkX, chunkZ);
+        if (!veinFluids.containsKey(pos)) {
             BedrockFluidDefinition definition = null;
-            int query = RandomSource.create(Objects.hash(serverLevel.getSeed(), chunkX / VEIN_CHUNK_SIZE, chunkZ / VEIN_CHUNK_SIZE)).nextInt();
+            int query = RandomSource
+                    .create(Objects.hash(serverLevel.getSeed(), chunkX / VEIN_CHUNK_SIZE, chunkZ / VEIN_CHUNK_SIZE))
+                    .nextInt();
             var biome = serverLevel.getBiome(new BlockPos(chunkX << 4, 64, chunkZ << 4));
             int totalWeight = getTotalWeight(biome);
             if (totalWeight > 0) {
                 int weight = Math.abs(query % totalWeight);
                 for (var fluidDefinition : GTRegistries.BEDROCK_FLUID_DEFINITIONS) {
-                    int veinWeight = fluidDefinition.getWeight() + fluidDefinition.getBiomeWeightModifier().apply(biome);
-                    if (veinWeight > 0 && (fluidDefinition.getDimensionFilter() == null || fluidDefinition.getDimensionFilter().stream().anyMatch(dim -> WorldGeneratorUtils.isSameDimension(dim, serverLevel.dimension())))) {
+                    int veinWeight = fluidDefinition.getWeight() +
+                            fluidDefinition.getBiomeWeightModifier().apply(biome);
+                    if (veinWeight > 0 && (fluidDefinition.getDimensionFilter() == null ||
+                            fluidDefinition.getDimensionFilter().stream().anyMatch(
+                                    dim -> WorldGeneratorUtils.isSameDimension(dim, serverLevel.dimension())))) {
                         weight -= veinWeight;
                         if (weight < 0) {
                             definition = fluidDefinition;
@@ -104,27 +114,29 @@ public class BedrockFluidVeinSavedData extends SavedData {
                 if (definition.getMaximumYield() - definition.getMinimumYield() <= 0) {
                     maximumYield = definition.getMinimumYield();
                 } else {
-                    maximumYield = random.nextInt(definition.getMaximumYield() - definition.getMinimumYield()) + definition.getMinimumYield();
+                    maximumYield = random.nextInt(definition.getMaximumYield() - definition.getMinimumYield()) +
+                            definition.getMinimumYield();
                 }
                 maximumYield = Math.min(maximumYield, definition.getMaximumYield());
             }
-            veinFluids.put(new ChunkPos(chunkX, chunkZ), new FluidVeinWorldEntry(definition, maximumYield, MAXIMUM_VEIN_OPERATIONS));
+            veinFluids.put(pos, new FluidVeinWorldEntry(definition, maximumYield, MAXIMUM_VEIN_OPERATIONS));
             setDirty();
         }
-        return veinFluids.get(new ChunkPos(chunkX, chunkZ));
+        return veinFluids.get(pos);
     }
 
     /**
      * Gets the total weight of all veins for the given dimension ID and biome type
      *
-     * @param biome    The biome type to check
+     * @param biome The biome type to check
      * @return The total weight associated with the dimension/biome pair
      */
     public int getTotalWeight(Holder<Biome> biome) {
         return biomeWeights.computeIfAbsent(biome, b -> {
             int totalWeight = 0;
             for (var definition : GTRegistries.BEDROCK_FLUID_DEFINITIONS) {
-                if (definition.getDimensionFilter() == null || definition.getDimensionFilter().stream().anyMatch(dim -> WorldGeneratorUtils.isSameDimension(dim, serverLevel.dimension()))) {
+                if (definition.getDimensionFilter() == null || definition.getDimensionFilter().stream()
+                        .anyMatch(dim -> WorldGeneratorUtils.isSameDimension(dim, serverLevel.dimension()))) {
                     totalWeight += definition.getBiomeWeightModifier().apply(biome);
                     totalWeight += definition.getWeight();
                 }
@@ -212,5 +224,4 @@ public class BedrockFluidVeinSavedData extends SavedData {
             setDirty();
         }
     }
-
 }

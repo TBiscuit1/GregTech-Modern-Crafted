@@ -29,6 +29,7 @@ import static com.gregtechceu.gtceu.utils.FormattingUtil.toEnglishName;
  * @implNote MachineBuilder
  */
 public class GeneratorBuilder extends SimpleMachineBuilder {
+
     public GeneratorBuilder(String name, Function<IMachineBlockEntity, MetaMachine> machineConstructor) {
         super(name, machineConstructor);
     }
@@ -40,10 +41,14 @@ public class GeneratorBuilder extends SimpleMachineBuilder {
 
     private static GeneratorBuilder[] tieredMachines(String name,
                                                      BiConsumer<GeneratorBuilder, Integer> builderConsumer,
+                                                     float hazardStrengthPerOperation,
                                                      Integer... tiers) {
         GeneratorBuilder[] builders = new GeneratorBuilder[GTValues.TIER_COUNT];
         for (int tier : tiers) {
-            var register = new GeneratorBuilder(GTValues.VN[tier].toLowerCase(Locale.ROOT) + "_" + name, holder -> new SimpleGeneratorMachine(holder, tier, defaultTankSizeFunction)).tier(tier);
+            var register = new GeneratorBuilder(GTValues.VN[tier].toLowerCase(Locale.ROOT) + "_" + name,
+                    holder -> new SimpleGeneratorMachine(holder, tier, hazardStrengthPerOperation * tier,
+                            defaultTankSizeFunction))
+                    .tier(tier);
             builderConsumer.accept(register, tier);
             builders[tier] = register;
         }
@@ -52,17 +57,23 @@ public class GeneratorBuilder extends SimpleMachineBuilder {
 
     private static void simple(GeneratorBuilder builder, int tier) {
         builder.langValue("%s %s Generator %s".formatted(VLVH[tier], toEnglishName(builder.id.getPath()), VLVT[tier]))
-                //.editableUI(SimpleGeneratorMachine.EDITABLE_UI_CREATOR.apply(GTCEu.id(builder.id.getPath()), recipeType))
+                // .editableUI(SimpleGeneratorMachine.EDITABLE_UI_CREATOR.apply(GTCEu.id(builder.id.getPath()),
+                // recipeType))
                 .rotationState(RotationState.NON_Y_AXIS)
-                //.recipeType(recipeType)
+                // .recipeType(recipeType)
                 .recipeModifier(SimpleGeneratorMachine::recipeModifier, true)
-                .renderer(() -> new SimpleGeneratorMachineRenderer(tier, GTCEu.id("block/generators/" + builder.id.getPath())))
+                .renderer(() -> new SimpleGeneratorMachineRenderer(tier,
+                        GTCEu.id("block/generators/" + builder.id.getPath())))
                 .tooltips(explosion());
-                //.tooltips(workableTiered(tier, GTValues.V[tier], GTValues.V[tier] * 64, recipeType, tankScalingFunction.apply(tier), false))
+        // .tooltips(workableTiered(tier, GTValues.V[tier], GTValues.V[tier] * 64, recipeType,
+        // tankScalingFunction.apply(tier), false))
     }
 
     public static MachineBuilder<MachineDefinition> createAll(String name, Object... args) {
-        GeneratorBuilder[] builders = tieredMachines(name, GeneratorBuilder::simple, MachineFunctionPresets.mapTierArray(args));
-        return MachineFunctionPresets.builder(name, builders, GeneratorBuilder.class, MachineDefinition::createDefinition, MetaMachineBlock::new, MetaMachineBlockEntity::createBlockEntity);
+        GeneratorBuilder[] builders = tieredMachines(name, GeneratorBuilder::simple,
+                args.length < 2 ? 1 : (int) args[0],
+                MachineFunctionPresets.mapTierArray(Arrays.copyOfRange(args, args.length < 2 ? 0 : 1, args.length)));
+        return MachineFunctionPresets.builder(name, builders, GeneratorBuilder.class,
+                MachineDefinition::createDefinition, MetaMachineBlock::new, MetaMachineBlockEntity::createBlockEntity);
     }
 }

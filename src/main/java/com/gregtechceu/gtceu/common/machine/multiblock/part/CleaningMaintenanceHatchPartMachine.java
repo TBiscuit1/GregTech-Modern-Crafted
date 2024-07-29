@@ -1,23 +1,27 @@
 package com.gregtechceu.gtceu.common.machine.multiblock.part;
 
-import com.google.common.collect.ImmutableSet;
 import com.gregtechceu.gtceu.api.GTValues;
+import com.gregtechceu.gtceu.api.capability.ICleanroomReceiver;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.ICleanroomProvider;
-import com.gregtechceu.gtceu.api.capability.ICleanroomReceiver;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.multiblock.CleanroomType;
 import com.gregtechceu.gtceu.api.machine.multiblock.DummyCleanroom;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.common.collect.ImmutableSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Set;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class CleaningMaintenanceHatchPartMachine extends AutoMaintenanceHatchPartMachine {
+
     protected static final Set<CleanroomType> CLEANED_TYPES = new ObjectOpenHashSet<>();
 
     static {
@@ -58,7 +62,7 @@ public class CleaningMaintenanceHatchPartMachine extends AutoMaintenanceHatchPar
      * @param type the type to add
      */
     @SuppressWarnings("unused")
-    public static void addCleanroomType(@Nonnull CleanroomType type) {
+    public static void addCleanroomType(@NotNull CleanroomType type) {
         CLEANED_TYPES.add(type);
     }
 
@@ -69,5 +73,4 @@ public class CleaningMaintenanceHatchPartMachine extends AutoMaintenanceHatchPar
     public static ImmutableSet<CleanroomType> getCleanroomTypes() {
         return ImmutableSet.copyOf(CLEANED_TYPES);
     }
-
 }

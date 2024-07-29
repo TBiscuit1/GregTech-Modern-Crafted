@@ -1,9 +1,10 @@
 package com.gregtechceu.gtceu.client.renderer.block;
 
 import com.gregtechceu.gtceu.client.model.SpriteOverrider;
+
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.client.model.ModelFactory;
-import lombok.Getter;
+
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
@@ -14,8 +15,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -29,12 +32,12 @@ import java.util.function.Supplier;
 @Getter
 public class TextureOverrideRenderer extends CTMModelRenderer {
 
-    @Nonnull
+    @NotNull
     protected Map<String, ResourceLocation> override;
     @Nullable
     protected Supplier<Map<String, ResourceLocation>> overrideSupplier;
 
-    public TextureOverrideRenderer(ResourceLocation model, @Nonnull Map<String, ResourceLocation> override) {
+    public TextureOverrideRenderer(ResourceLocation model, @NotNull Map<String, ResourceLocation> override) {
         super(model);
         this.override = override;
         if (LDLib.isClient()) {
@@ -42,7 +45,8 @@ public class TextureOverrideRenderer extends CTMModelRenderer {
         }
     }
 
-    public TextureOverrideRenderer(ResourceLocation model, @Nonnull Supplier<Map<String, ResourceLocation>> overrideSupplier) {
+    public TextureOverrideRenderer(ResourceLocation model,
+                                   @NotNull Supplier<Map<String, ResourceLocation>> overrideSupplier) {
         super(model);
         this.override = Collections.emptyMap();
         this.overrideSupplier = overrideSupplier;
@@ -96,8 +100,8 @@ public class TextureOverrideRenderer extends CTMModelRenderer {
         super.onPrepareTextureAtlas(atlasName, register);
         if (atlasName.equals(TextureAtlas.LOCATION_BLOCKS)) { // prepare for override.
             if (overrideSupplier != null) override = overrideSupplier.get();
-            for (Object value : override.values()) {
-                register.accept(new ResourceLocation(value.toString()));
+            for (ResourceLocation value : override.values()) {
+                register.accept(value);
             }
         }
     }

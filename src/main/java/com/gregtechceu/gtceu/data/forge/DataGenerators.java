@@ -4,13 +4,14 @@ import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.registry.registrate.CompassNode;
 import com.gregtechceu.gtceu.api.registry.registrate.CompassSection;
 import com.gregtechceu.gtceu.api.registry.registrate.SoundEntryBuilder;
+import com.gregtechceu.gtceu.common.data.GTBiomeModifiers;
 import com.gregtechceu.gtceu.common.data.GTConfiguredFeatures;
 import com.gregtechceu.gtceu.common.data.GTDamageTypes;
 import com.gregtechceu.gtceu.common.data.GTPlacements;
 import com.gregtechceu.gtceu.common.data.GTWorldgen;
-import com.gregtechceu.gtceu.common.data.forge.GTBiomeModifiers;
 import com.gregtechceu.gtceu.data.tags.BiomeTagsLoader;
-import com.gregtechceu.gtceu.data.tags.EntityTypeTagLoader;
+import com.gregtechceu.gtceu.data.tags.DamageTagsLoader;
+
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
@@ -41,14 +42,17 @@ public class DataGenerators {
         if (event.includeServer()) {
             var set = Set.of(GTCEu.MOD_ID);
             generator.addProvider(true, new BiomeTagsLoader(packOutput, registries, existingFileHelper));
-            generator.addProvider(true, new DatapackBuiltinEntriesProvider(
-                packOutput, registries, new RegistrySetBuilder()
-                .add(Registries.DAMAGE_TYPE, GTDamageTypes::bootstrap)
+            DatapackBuiltinEntriesProvider provider = generator.addProvider(true, new DatapackBuiltinEntriesProvider(
+                    packOutput, registries, new RegistrySetBuilder()
+                            .add(Registries.DAMAGE_TYPE, GTDamageTypes::bootstrap)
 
-                .add(Registries.CONFIGURED_FEATURE, GTConfiguredFeatures::bootstrap)
-                .add(Registries.PLACED_FEATURE, GTPlacements::bootstrap)
-                .add(Registries.DENSITY_FUNCTION, GTWorldgen::bootstrapDensityFunctions)
-                .add(ForgeRegistries.Keys.BIOME_MODIFIERS, ctx -> GTBiomeModifiers.bootstrap(ctx, registries)), set));
+                            .add(Registries.CONFIGURED_FEATURE, GTConfiguredFeatures::bootstrap)
+                            .add(Registries.PLACED_FEATURE, GTPlacements::bootstrap)
+                            .add(Registries.DENSITY_FUNCTION, GTWorldgen::bootstrapDensityFunctions)
+                            .add(ForgeRegistries.Keys.BIOME_MODIFIERS, GTBiomeModifiers::bootstrap),
+                    set));
+            generator.addProvider(true,
+                    new DamageTagsLoader(packOutput, provider.getRegistryProvider(), existingFileHelper));
         }
     }
 }

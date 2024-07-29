@@ -7,11 +7,7 @@ import com.gregtechceu.gtceu.api.data.worldgen.GTOreDefinition;
 import com.gregtechceu.gtceu.api.data.worldgen.generator.VeinGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.ores.OreBlockPlacer;
 import com.gregtechceu.gtceu.api.data.worldgen.ores.OreVeinUtil;
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.tterrag.registrate.util.nullness.NonNullSupplier;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
@@ -24,6 +20,12 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.tterrag.registrate.util.nullness.NonNullSupplier;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +35,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LayeredVeinGenerator extends VeinGenerator {
+
     public static final Codec<LayeredVeinGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    GTLayerPattern.CODEC.listOf().fieldOf("layer_patterns").forGetter(ft -> ft.layerPatterns != null ? ft.layerPatterns : ft.bakingLayerPatterns.stream().map(Supplier::get).collect(Collectors.toList()))
-            ).apply(instance, LayeredVeinGenerator::new)
-    );
+            GTLayerPattern.CODEC.listOf().fieldOf("layer_patterns")
+                    .forGetter(LayeredVeinGenerator::getLayerPatterns))
+            .apply(instance, LayeredVeinGenerator::new));
 
     private final List<NonNullSupplier<GTLayerPattern>> bakingLayerPatterns = new ArrayList<>();
 
@@ -46,33 +49,46 @@ public class LayeredVeinGenerator extends VeinGenerator {
         super(entry);
     }
 
+    public List<GTLayerPattern> getLayerPatterns() {
+        if (layerPatterns == null || this.layerPatterns.isEmpty()) {
+            layerPatterns = bakingLayerPatterns.stream().map(Supplier::get).collect(Collectors.toList());
+        }
+        return layerPatterns;
+    }
+
     @Override
     public List<Map.Entry<Either<BlockState, Material>, Integer>> getAllEntries() {
-        return layerPatterns.stream()
+        return getLayerPatterns().stream()
                 .flatMap(pattern -> pattern.layers.stream())
-                .map(layer -> Map.entry(layer.targets.stream().flatMap(entry ->
-                                entry.map(blockStates -> blockStates.stream().map(state -> Either.<BlockState, Material>left(state.state)),
-                                        material -> Stream.of(Either.<BlockState, Material>right(material)))).toList(),
+                .map(layer -> Map.entry(
+                        layer.targets.stream()
+                                .flatMap(entry -> entry.map(
+                                        blockStates -> blockStates.stream()
+                                                .map(state -> Either.<BlockState, Material>left(state.state)),
+                                        material -> Stream.of(Either.<BlockState, Material>right(material))))
+                                .toList(),
                         layer.weight))
                 .flatMap(entry -> {
                     var iterator = entry.getKey().iterator();
-                    return Stream.generate(() -> Map.entry(iterator.next(), entry.getValue())).limit(entry.getKey().size());
+                    return Stream.generate(() -> Map.entry(iterator.next(), entry.getValue()))
+                            .limit(entry.getKey().size());
                 })
                 .distinct()
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Map<BlockPos, OreBlockPlacer> generate(WorldGenLevel level, RandomSource random, GTOreDefinition entry, BlockPos origin) {
+    public Map<BlockPos, OreBlockPlacer> generate(WorldGenLevel level, RandomSource random, GTOreDefinition entry,
+                                                  BlockPos origin) {
         Map<BlockPos, OreBlockPlacer> generatedBlocks = new Object2ObjectOpenHashMap<>();
-        var patternPool = this.layerPatterns;
+        var patternPool = this.getLayerPatterns();
 
         if (patternPool.isEmpty())
             return Map.of();
 
         GTLayerPattern layerPattern = patternPool.get(random.nextInt(patternPool.size()));
 
-        int size = entry.clusterSize();
+        int size = entry.clusterSize().sample(random);
         float density = entry.density();
 
         int radius = Mth.ceil(size / 2f);
@@ -87,11 +103,9 @@ public class LayeredVeinGenerator extends VeinGenerator {
         if (origin.getY() >= level.getMaxBuildHeight())
             return Map.of();
 
-
         List<GTLayerPattern.Layer> resolvedLayers = new ArrayList<>();
         List<Float> layerDiameterOffsets = new ArrayList<>();
 
-        BlockPos.MutableBlockPos posCursor = new BlockPos.MutableBlockPos();
         int layerCoordinate = random.nextInt(4);
         int slantyCoordinate = random.nextInt(3);
         float slope = random.nextFloat() * .75f;
@@ -113,7 +127,8 @@ public class LayeredVeinGenerator extends VeinGenerator {
 
                     int layerIndex = layerCoordinate == 0 ? zOffset : layerCoordinate == 1 ? xOffset : yOffset;
                     if (slantyCoordinate != layerCoordinate)
-                        layerIndex += Mth.floor(slantyCoordinate == 0 ? zOffset : slantyCoordinate == 1 ? xOffset : yOffset) * slope;
+                        layerIndex += Mth.floor(
+                                slantyCoordinate == 0 ? zOffset : slantyCoordinate == 1 ? xOffset : yOffset) * slope;
 
                     while (layerIndex >= resolvedLayers.size()) {
                         GTLayerPattern.Layer next = layerPattern.rollNext(
@@ -126,7 +141,8 @@ public class LayeredVeinGenerator extends VeinGenerator {
                         }
                     }
 
-                    if ((sizeFractionX * sizeFractionX) + (sizeFractionY * sizeFractionY) + (sizeFractionZ * sizeFractionZ) > 1 * layerDiameterOffsets.get(layerIndex))
+                    if ((sizeFractionX * sizeFractionX) + (sizeFractionY * sizeFractionY) +
+                            (sizeFractionZ * sizeFractionZ) > 1 * layerDiameterOffsets.get(layerIndex))
                         continue;
 
                     GTLayerPattern.Layer layer = resolvedLayers.get(layerIndex);
@@ -139,9 +155,8 @@ public class LayeredVeinGenerator extends VeinGenerator {
                     final var randomSeed = random.nextLong(); // Fully deterministic regardless of chunk order
 
                     BlockPos currentPos = new BlockPos(currentX, currentY, currentZ);
-                    generatedBlocks.put(currentPos, (access, section) ->
-                            placeBlock(access, section, randomSeed, entry, density, state, currentPos)
-                    );
+                    generatedBlocks.put(currentPos, (access, section) -> placeBlock(access, section, randomSeed, entry,
+                            density, state, currentPos));
                 }
             }
         }
@@ -157,13 +172,14 @@ public class LayeredVeinGenerator extends VeinGenerator {
         int y = SectionPos.sectionRelative(pos.getY());
         int z = SectionPos.sectionRelative(pos.getZ());
 
-        BlockState blockstate = section.getBlockState(x, y, z);
+        BlockState blockState = section.getBlockState(x, y, z);
         BlockPos.MutableBlockPos posCursor = pos.mutable();
 
         if (random.nextFloat() <= density) {
             state.ifLeft(blockStates -> {
                 for (OreConfiguration.TargetBlockState targetState : blockStates) {
-                    if (!OreVeinUtil.canPlaceOre(blockstate, access::getBlockState, random, entry, targetState, posCursor))
+                    if (!OreVeinUtil.canPlaceOre(blockState, access::getBlockState, random, entry, targetState,
+                            posCursor))
                         continue;
                     if (targetState.state.isAir())
                         continue;
@@ -171,7 +187,7 @@ public class LayeredVeinGenerator extends VeinGenerator {
                     break;
                 }
             }).ifRight(material -> {
-                if (!OreVeinUtil.canPlaceOre(blockstate, access::getBlockState, random, entry, posCursor))
+                if (!OreVeinUtil.canPlaceOre(blockState, access::getBlockState, random, entry, posCursor))
                     return;
                 BlockState currentState = access.getBlockState(posCursor);
                 var prefix = ChemicalHelper.getOrePrefix(currentState);
@@ -203,16 +219,15 @@ public class LayeredVeinGenerator extends VeinGenerator {
 
     public VeinGenerator build() {
         if (this.layerPatterns != null && !this.layerPatterns.isEmpty()) return this;
-        List<GTLayerPattern> layerPatterns = this.bakingLayerPatterns.stream()
+        this.layerPatterns = this.bakingLayerPatterns.stream()
                 .map(NonNullSupplier::get)
                 .toList();
-        this.layerPatterns = layerPatterns;
         return this;
     }
 
     @Override
     public VeinGenerator copy() {
-        return new LayeredVeinGenerator(this.layerPatterns);
+        return new LayeredVeinGenerator(new ArrayList<>(this.layerPatterns));
     }
 
     @Override
@@ -220,4 +235,3 @@ public class LayeredVeinGenerator extends VeinGenerator {
         return CODEC;
     }
 }
-

@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.gui.fancy;
 
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
 import com.lowdragmc.lowdraglib.gui.util.ClickData;
@@ -10,22 +11,24 @@ import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 import com.lowdragmc.lowdraglib.utils.Position;
 import com.lowdragmc.lowdraglib.utils.Size;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Consumer;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class TitleBarWidget extends WidgetGroup {
+
     private static final int BORDER_WIDTH = 3;
     private static final int HORIZONTAL_MARGIN = 8;
     private static final int HEIGHT = 16;
     private static final int BTN_WIDTH = 18;
 
-    // TODO make this work. The roll speed isn't getting applied currently and it's too fast.
-    private static final float ROLL_SPEED = 0.2f;
+    private static final float ROLL_SPEED = 0.7f;
 
     private int width;
     private boolean showBackButton = false;
@@ -57,21 +60,22 @@ public class TitleBarWidget extends WidgetGroup {
 
         addWidget(this.buttonGroup = new WidgetGroup(0, BORDER_WIDTH, width, innerHeight));
         buttonGroup.setBackground(GuiTextures.TITLE_BAR_BACKGROUND);
-        buttonGroup.addWidget(this.backButton = new ButtonWidget(0, BORDER_WIDTH, BTN_WIDTH, HEIGHT - BORDER_WIDTH, new TextTexture(" <").setDropShadow(false).setColor(ChatFormatting.BLACK.getColor()), onBackClicked)
-            .setHoverTooltips("gtceu.gui.title_bar.back"));
-        buttonGroup.addWidget(this.menuButton = new ButtonWidget(width - BTN_WIDTH, BORDER_WIDTH, BTN_WIDTH, HEIGHT - BORDER_WIDTH, new TextTexture("+").setDropShadow(false).setColor(ChatFormatting.BLACK.getColor()), onMenuClicked)
-            .setHoverTooltips("gtceu.gui.title_bar.page_switcher"));
+        buttonGroup.addWidget(this.backButton = new ButtonWidget(0, BORDER_WIDTH, BTN_WIDTH, HEIGHT - BORDER_WIDTH,
+                new TextTexture(" <").setDropShadow(false).setColor(ChatFormatting.BLACK.getColor()), onBackClicked)
+                .setHoverTooltips("gtceu.gui.title_bar.back"));
+        buttonGroup.addWidget(this.menuButton = new ButtonWidget(width - BTN_WIDTH, BORDER_WIDTH, BTN_WIDTH,
+                HEIGHT - BORDER_WIDTH,
+                new TextTexture("+").setDropShadow(false).setColor(ChatFormatting.BLACK.getColor()), onMenuClicked)
+                .setHoverTooltips("gtceu.gui.title_bar.page_switcher"));
 
         addWidget(this.mainSection = new WidgetGroup(BTN_WIDTH, 0, width, HEIGHT));
         mainSection.setBackground(GuiTextures.TITLE_BAR_BACKGROUND);
         mainSection.addWidget(this.tabIcon = new ImageWidget(
-            BORDER_WIDTH + 1, BORDER_WIDTH + 1,
-            innerHeight - 2, innerHeight - 2,
-            IGuiTexture.EMPTY
-        ));
+                BORDER_WIDTH + 1, BORDER_WIDTH + 1,
+                innerHeight - 2, innerHeight - 2,
+                IGuiTexture.EMPTY));
         mainSection.addWidget(this.tabTitle = new ImageWidget(
-            BORDER_WIDTH + innerHeight, BORDER_WIDTH, 0, 0, IGuiTexture.EMPTY
-        ));
+                BORDER_WIDTH + innerHeight, BORDER_WIDTH, 0, 0, IGuiTexture.EMPTY));
     }
 
     public void updateState(IFancyUIProvider currentPage, boolean showBackButton, boolean showMenuButton) {
@@ -79,8 +83,8 @@ public class TitleBarWidget extends WidgetGroup {
         this.showMenuButton = showMenuButton;
 
         titleText = new TextTexture(ChatFormatting.BLACK.toString() + currentPage.getTitle().copy().getString())
-            .setDropShadow(false)
-            .setType(TextTexture.TextType.ROLL_ALWAYS);
+                .setDropShadow(false)
+                .setType(TextTexture.TextType.ROLL);
         titleText.setRollSpeed(ROLL_SPEED);
 
         tabIcon.setImage(currentPage.getTabIcon());

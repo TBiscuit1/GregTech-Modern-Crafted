@@ -2,17 +2,14 @@ package com.gregtechceu.gtceu.api.pattern;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.block.ActiveBlock;
-import com.gregtechceu.gtceu.api.pattern.error.PatternError;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+import com.gregtechceu.gtceu.api.pattern.error.PatternError;
 import com.gregtechceu.gtceu.api.pattern.error.PatternStringError;
 import com.gregtechceu.gtceu.api.pattern.predicates.SimplePredicate;
 import com.gregtechceu.gtceu.api.pattern.util.PatternMatchContext;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import it.unimi.dsi.fastutil.longs.LongSets;
-import lombok.Getter;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -20,13 +17,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.LongSets;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MultiblockState {
+
     public final static PatternError UNLOAD_ERROR = new PatternStringError("multiblocked.pattern.error.chunk");
     public final static PatternError UNINIT_ERROR = new PatternStringError("multiblocked.pattern.error.init");
 
@@ -43,6 +47,9 @@ public class MultiblockState {
     public TraceabilityPredicate predicate;
     public IO io;
     public PatternError error;
+    @Getter
+    @Setter
+    private boolean neededFlip = false;
     public final Level world;
     public final BlockPos controllerPos;
     public IMultiController lastController;
@@ -80,8 +87,8 @@ public class MultiblockState {
 
     public IMultiController getController() {
         if (world.isLoaded(controllerPos)) {
-            if (world.getBlockEntity(controllerPos) instanceof IMachineBlockEntity machineBlockEntity
-                    && machineBlockEntity.getMetaMachine() instanceof IMultiController controller) {
+            if (world.getBlockEntity(controllerPos) instanceof IMachineBlockEntity machineBlockEntity &&
+                    machineBlockEntity.getMetaMachine() instanceof IMultiController controller) {
                 return lastController = controller;
             }
         } else {
@@ -177,9 +184,11 @@ public class MultiblockState {
                     }
                     if (controller.checkPatternWithLock()) {
                         // refresh structure
+                        controller.self().setFlipped(this.neededFlip);
                         controller.onStructureFormed();
                     } else {
                         // invalid structure
+                        controller.self().setFlipped(false);
                         controller.onStructureInvalid();
                         var mwsd = MultiblockWorldSavedData.getOrCreate(serverLevel);
                         mwsd.removeMapping(this);
@@ -189,5 +198,4 @@ public class MultiblockState {
             }
         }
     }
-
 }

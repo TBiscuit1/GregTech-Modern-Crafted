@@ -2,23 +2,40 @@ package com.gregtechceu.gtceu.common.machine.multiblock.part;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
+import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
+import com.gregtechceu.gtceu.api.gui.widget.ToggleButtonWidget;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
+import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigurator;
+import com.gregtechceu.gtceu.api.machine.feature.IMachineModifyDrops;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredIOPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
+import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
+import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
+import com.gregtechceu.gtceu.config.ConfigHolder;
+
 import com.lowdragmc.lowdraglib.gui.widget.*;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
+import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -29,9 +46,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
  */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class FluidHatchPartMachine extends TieredIOPartMachine {
+public class FluidHatchPartMachine extends TieredIOPartMachine implements IMachineModifyDrops {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(FluidHatchPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(FluidHatchPartMachine.class,
+            TieredIOPartMachine.MANAGED_FIELD_HOLDER);
 
     public static final long INITIAL_TANK_CAPACITY_1X = 8 * FluidHelper.getBucket();
     public static final long INITIAL_TANK_CAPACITY_4X = 2 * FluidHelper.getBucket();
@@ -44,17 +62,22 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
     protected TickableSubscription autoIOSubs;
     @Nullable
     protected ISubscription tankSubs;
+    @Getter
+    @Persisted
+    protected final NotifiableItemStackHandler circuitInventory;
 
     // The `Object... args` parameter is necessary in case a superclass needs to pass any args along to createTank().
     // We can't use fields here because those won't be available while createTank() is called.
-    public FluidHatchPartMachine(IMachineBlockEntity holder, int tier, IO io, long initialCapacity, int slots, Object... args) {
+    public FluidHatchPartMachine(IMachineBlockEntity holder, int tier, IO io, long initialCapacity, int slots,
+                                 Object... args) {
         super(holder, tier, io);
         this.slots = slots;
         this.tank = createTank(initialCapacity, slots, args);
+        this.circuitInventory = createCircuitItemHandler(io);
     }
 
     //////////////////////////////////////
-    //*****     Initialization    ******//
+    // ***** Initialization ******//
     //////////////////////////////////////
     @Override
     public ManagedFieldHolder getFieldHolder() {
@@ -67,6 +90,22 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
 
     public static long getTankCapacity(long initialCapacity, int tier) {
         return initialCapacity * (1L << Math.min(9, tier));
+    }
+
+    protected NotifiableItemStackHandler createCircuitItemHandler(Object... args) {
+        if (args.length > 0 && args[0] instanceof IO io && io == IO.IN) {
+            return new NotifiableItemStackHandler(this, 1, IO.IN, IO.NONE)
+                    .setFilter(IntCircuitBehaviour::isIntegratedCircuit);
+        } else {
+            return new NotifiableItemStackHandler(this, 0, IO.NONE);
+        }
+    }
+
+    @Override
+    public void onDrops(List<ItemStack> drops, Player entity) {
+        if (!ConfigHolder.INSTANCE.machines.ghostCircuit) {
+            clearInventory(drops, circuitInventory.storage);
+        }
     }
 
     @Override
@@ -88,7 +127,7 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
     }
 
     //////////////////////////////////////
-    //********     Auto IO     *********//
+    // ******** Auto IO *********//
     //////////////////////////////////////
 
     @Override
@@ -104,8 +143,9 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
     }
 
     protected void updateTankSubscription() {
-        if (isWorkingEnabled() && ((io == IO.OUT && !tank.isEmpty()) || io == IO.IN)
-                && FluidTransferHelper.getFluidTransfer(getLevel(), getPos().relative(getFrontFacing()), getFrontFacing().getOpposite()) != null) {
+        if (isWorkingEnabled() && ((io == IO.OUT && !tank.isEmpty()) || io == IO.IN) &&
+                FluidTransferHelper.getFluidTransfer(getLevel(), getPos().relative(getFrontFacing()),
+                        getFrontFacing().getOpposite()) != null) {
             autoIOSubs = subscribeServerTick(autoIOSubs, this::autoIO);
         } else if (autoIOSubs != null) {
             autoIOSubs.unsubscribe();
@@ -118,7 +158,7 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
             if (isWorkingEnabled()) {
                 if (io == IO.OUT) {
                     tank.exportToNearby(getFrontFacing());
-                } else if (io == IO.IN){
+                } else if (io == IO.IN) {
                     tank.importFromNearby(getFrontFacing());
                 }
             }
@@ -133,11 +173,19 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
     }
 
     //////////////////////////////////////
-    //**********     GUI     ***********//
+    // ********** GUI ***********//
     //////////////////////////////////////
+
+    @Override
+    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
+        super.attachConfigurators(configuratorPanel);
+        if (this.io == IO.IN) {
+            configuratorPanel.attachConfigurators(new CircuitFancyConfigurator(circuitInventory.storage));
+        }
+    }
+
     @Override
     public Widget createUIWidget() {
-
         if (slots == 1) {
             return createSingleSlotGUI();
         } else {
@@ -147,14 +195,71 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
 
     protected Widget createSingleSlotGUI() {
         var group = new WidgetGroup(0, 0, 89, 63);
+        group.addWidget(new ImageWidget(4, 4, 81, 55, GuiTextures.DISPLAY));
+        TankWidget tankWidget;
 
-        group.addWidget(new ImageWidget(4, 4, 81, 55, GuiTextures.DISPLAY))
-                .addWidget(new LabelWidget(8, 8, "gtceu.gui.fluid_amount"))
-                .addWidget(new LabelWidget(8, 18, () -> String.valueOf(tank.getFluidInTank(0).getAmount())).setTextColor(-1).setDropShadow(true))
-                .addWidget(new TankWidget(tank.storages[0], 67, 22, true, io.support(IO.IN)).setBackground(GuiTextures.FLUID_SLOT));
+        // Add input/output-specific widgets
+        if (this.io == IO.OUT) {
+            // if this is an output hatch, assign tankWidget to the phantom widget displaying the locked fluid...
+            group.addWidget(tankWidget = new PhantomFluidWidget(this.tank.getLockedFluid(), 0, 67, 40, 18, 18,
+                    () -> this.tank.getLockedFluid().getFluid(), f -> {
+                        if (!this.tank.getFluidInTank(0).isEmpty()) {
+                            return;
+                        }
+                        if (f == null || f.isEmpty()) {
+                            this.tank.setLocked(false);
+                        } else {
+                            FluidStack newFluid = f.copy();
+                            newFluid.setAmount(1);
+                            this.tank.setLocked(true, newFluid);
+                        }
+                    }).setShowAmount(true).setDrawHoverTips(true).setBackground(GuiTextures.FLUID_SLOT));
+
+            group.addWidget(new ToggleButtonWidget(7, 40, 18, 18,
+                    GuiTextures.BUTTON_LOCK, this.tank::isLocked, this.tank::setLocked)
+                    .setTooltipText("gtceu.gui.fluid_lock.tooltip")
+                    .setShouldUseBaseBackground())
+                    // ...and add the actual tank widget separately.
+                    .addWidget(new TankWidget(tank.getStorages()[0], 67, 22, 18, 18, true, io.support(IO.IN))
+                            .setShowAmount(true).setDrawHoverTips(true).setBackground(GuiTextures.FLUID_SLOT));
+        } else {
+            group.addWidget(tankWidget = new TankWidget(tank.getStorages()[0], 67, 22, 18, 18, true, io.support(IO.IN))
+                    .setShowAmount(true).setDrawHoverTips(true).setBackground(GuiTextures.FLUID_SLOT));
+        }
+
+        group.addWidget(new LabelWidget(8, 8, "gtceu.gui.fluid_amount"))
+                .addWidget(new LabelWidget(8, 18, () -> getFluidAmountText(tankWidget)))
+                .addWidget(new LabelWidget(8, 28, () -> getFluidNameText(tankWidget).getString()));
 
         group.setBackground(GuiTextures.BACKGROUND_INVERSE);
         return group;
+    }
+
+    private Component getFluidNameText(TankWidget tankWidget) {
+        Component translation;
+        if (!tank.getFluidInTank(tankWidget.getTank()).isEmpty()) {
+            translation = tank.getFluidInTank(tankWidget.getTank()).getDisplayName();
+        } else {
+            translation = this.tank.getLockedFluid().getFluid().getDisplayName();
+        }
+        return translation;
+    }
+
+    private String getFluidAmountText(TankWidget tankWidget) {
+        String fluidAmount = "";
+        if (!tank.getFluidInTank(tankWidget.getTank()).isEmpty()) {
+            fluidAmount = getFormattedFluidAmount(tank.getFluidInTank(tankWidget.getTank()));
+        } else {
+            // Display Zero to show information about the locked fluid
+            if (!this.tank.getLockedFluid().getFluid().isEmpty()) {
+                fluidAmount = "0";
+            }
+        }
+        return fluidAmount;
+    }
+
+    public String getFormattedFluidAmount(FluidStack fluidStack) {
+        return String.format("%,d", fluidStack.isEmpty() ? 0 : fluidStack.getAmount());
     }
 
     protected Widget createMultiSlotGUI() {
@@ -171,7 +276,9 @@ public class FluidHatchPartMachine extends TieredIOPartMachine {
         int index = 0;
         for (int y = 0; y < colSize; y++) {
             for (int x = 0; x < rowSize; x++) {
-                container.addWidget(new TankWidget(tank.storages[index++], 4 + x * 18, 4 + y * 18, true, io.support(IO.IN)).setBackground(GuiTextures.FLUID_SLOT));
+                container.addWidget(
+                        new TankWidget(tank.getStorages()[index++], 4 + x * 18, 4 + y * 18, true, io.support(IO.IN))
+                                .setBackground(GuiTextures.FLUID_SLOT));
             }
         }
 

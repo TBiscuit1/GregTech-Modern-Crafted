@@ -1,27 +1,35 @@
 package com.gregtechceu.gtceu.integration.ae2.util;
 
-import appeng.api.stacks.GenericStack;
 import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
 import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
-import lombok.Getter;
-import lombok.Setter;
+
 import net.minecraft.nbt.CompoundTag;
 
-import javax.annotation.Nullable;
+import appeng.api.stacks.GenericStack;
+import lombok.Getter;
+import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author GlodBlock
  * @Description A export only slot to hold {@link appeng.api.stacks.GenericStack}
  * @date 2023/4/22-13:42
  */
-public abstract class ExportOnlyAESlot implements IConfigurableSlot, ITagSerializable<CompoundTag>, IContentChangeAware {
+public abstract class ExportOnlyAESlot implements IConfigurableSlot, ITagSerializable<CompoundTag>,
+                                       IContentChangeAware {
+
     protected final static String CONFIG_TAG = "config";
     protected final static String STOCK_TAG = "stock";
 
-    @Getter @Setter
+    @Getter
+    @Setter
     protected Runnable onContentsChanged = () -> {};
 
+    @Getter
+    @Setter
     protected GenericStack config;
+    @Getter
+    @Setter
     protected GenericStack stock;
 
     public ExportOnlyAESlot(GenericStack config, GenericStack stock) {
@@ -44,7 +52,7 @@ public abstract class ExportOnlyAESlot implements IConfigurableSlot, ITagSeriali
         if (this.stock == null) {
             return copy(this.config);
         }
-        if (this.stock.amount() < this.config.amount()) {
+        if (this.stock.amount() <= this.config.amount()) {
             return copy(this.config, this.config.amount() - this.stock.amount());
         }
         return null;
@@ -93,27 +101,6 @@ public abstract class ExportOnlyAESlot implements IConfigurableSlot, ITagSeriali
         if (tag.contains(STOCK_TAG)) {
             this.stock = GenericStack.readTag(tag.getCompound(STOCK_TAG));
         }
-
-    }
-
-    @Override
-    public GenericStack getConfig() {
-        return this.config;
-    }
-
-    @Override
-    public GenericStack getStock() {
-        return this.stock;
-    }
-
-    @Override
-    public void setConfig(GenericStack val) {
-        this.config = val;
-    }
-
-    @Override
-    public void setStock(GenericStack val) {
-        this.stock = val;
     }
 
     public static GenericStack copy(GenericStack stack) {
@@ -123,5 +110,4 @@ public abstract class ExportOnlyAESlot implements IConfigurableSlot, ITagSeriali
     public static GenericStack copy(GenericStack stack, long amount) {
         return new GenericStack(stack.what(), amount);
     }
-
 }

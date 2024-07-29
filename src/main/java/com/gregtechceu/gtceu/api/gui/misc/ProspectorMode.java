@@ -9,20 +9,19 @@ import com.gregtechceu.gtceu.api.data.tag.TagUtil;
 import com.gregtechceu.gtceu.api.data.worldgen.bedrockfluid.BedrockFluidVeinSavedData;
 import com.gregtechceu.gtceu.api.data.worldgen.bedrockore.BedrockOreVeinSavedData;
 import com.gregtechceu.gtceu.api.gui.texture.ProspectingTexture;
-import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
+
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ProgressTexture;
 import com.lowdragmc.lowdraglib.gui.util.DrawerHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
-import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -35,9 +34,10 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.apache.commons.lang3.ArrayUtils;
 
-import javax.annotation.Nonnull;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
 /**
@@ -46,7 +46,9 @@ import java.util.*;
  * @implNote ProspectorMode
  */
 public abstract class ProspectorMode<T> {
+
     public static ProspectorMode<String> ORE = new ProspectorMode<>("metaitem.prospector.mode.ores", 16) {
+
         private final Map<BlockState, String> BLOCK_CACHE = new HashMap<>();
         private final Map<String, IGuiTexture> ICON_CACHE = new HashMap<>();
 
@@ -101,7 +103,8 @@ public abstract class ProspectorMode<T> {
                         return new ItemStackTexture(list.toArray(ItemStack[]::new)).scale(0.8f);
                     }
                 }
-                return new ItemStackTexture(new ItemStack(BuiltInRegistries.BLOCK.get(new ResourceLocation(name)))).scale(0.8f);
+                return new ItemStackTexture(new ItemStack(BuiltInRegistries.BLOCK.get(new ResourceLocation(name))))
+                        .scale(0.8f);
             });
         }
 
@@ -146,7 +149,8 @@ public abstract class ProspectorMode<T> {
                     }
                 }
             }
-            counter.forEach((item, count) -> tooltips.add(Component.translatable(getDescriptionId(item)).append(" --- " + count)));
+            counter.forEach((item, count) -> tooltips
+                    .add(Component.translatable(getDescriptionId(item)).append(" --- " + count)));
         }
     };
 
@@ -155,14 +159,18 @@ public abstract class ProspectorMode<T> {
     }
 
     public static ProspectorMode<FluidInfo> FLUID = new ProspectorMode<>("metaitem.prospector.mode.fluid", 1) {
+
         @Override
         public void scan(FluidInfo[][][] storage, LevelChunk chunk) {
             if (chunk.getLevel() instanceof ServerLevel serverLevel) {
-                var fluidVein = BedrockFluidVeinSavedData.getOrCreate(serverLevel).getFluidVeinWorldEntry(chunk.getPos().x, chunk.getPos().z);
+                var fluidVein = BedrockFluidVeinSavedData.getOrCreate(serverLevel)
+                        .getFluidVeinWorldEntry(chunk.getPos().x, chunk.getPos().z);
                 if (fluidVein.getDefinition() != null) {
-                    var left = 100 * fluidVein.getOperationsRemaining() / BedrockFluidVeinSavedData.MAXIMUM_VEIN_OPERATIONS;
+                    var left = 100 * fluidVein.getOperationsRemaining() /
+                            BedrockFluidVeinSavedData.MAXIMUM_VEIN_OPERATIONS;
                     storage[0][0] = new FluidInfo[] {
-                            new FluidInfo(fluidVein.getDefinition().getStoredFluid().get(), left, fluidVein.getFluidYield()),
+                            new FluidInfo(fluidVein.getDefinition().getStoredFluid().get(), left,
+                                    fluidVein.getFluidYield()),
                     };
                 }
             }
@@ -201,7 +209,8 @@ public abstract class ProspectorMode<T> {
 
         @Override
         public FluidInfo deserialize(FriendlyByteBuf buf) {
-            return new FluidInfo(BuiltInRegistries.FLUID.get(new ResourceLocation(buf.readUtf())), buf.readVarInt(), buf.readVarInt());
+            return new FluidInfo(BuiltInRegistries.FLUID.get(new ResourceLocation(buf.readUtf())), buf.readVarInt(),
+                    buf.readVarInt());
         }
 
         @Override
@@ -213,7 +222,8 @@ public abstract class ProspectorMode<T> {
         public void appendTooltips(List<FluidInfo[]> items, List<Component> tooltips, String selected) {
             for (var array : items) {
                 for (FluidInfo item : array) {
-                    tooltips.add(Component.translatable(getDescriptionId(item)).append(" --- %s (%s%%)".formatted(item.yield, item.left)));
+                    tooltips.add(Component.translatable(getDescriptionId(item))
+                            .append(" --- %s (%s%%)".formatted(item.yield, item.left)));
                 }
             }
         }
@@ -228,7 +238,9 @@ public abstract class ProspectorMode<T> {
                 float drawnV = (float) ProgressTexture.FillDirection.DOWN_TO_UP.getDrawnV(progress);
                 float drawnWidth = (float) ProgressTexture.FillDirection.DOWN_TO_UP.getDrawnWidth(progress);
                 float drawnHeight = (float) ProgressTexture.FillDirection.DOWN_TO_UP.getDrawnHeight(progress);
-                DrawerHelper.drawFluidForGui(graphics, FluidStack.create(item.fluid(), item.left), 100, (int) (x + drawnU * width), (int) (y + drawnV * height), ((int) (width * drawnWidth)), ((int) (height * drawnHeight)));
+                DrawerHelper.drawFluidForGui(graphics, FluidStack.create(item.fluid(), item.left), 100,
+                        (int) (x + drawnU * width), (int) (y + drawnV * height), ((int) (width * drawnWidth)),
+                        ((int) (height * drawnHeight)));
             }
         }
     };
@@ -237,15 +249,19 @@ public abstract class ProspectorMode<T> {
 
     }
 
-    public static ProspectorMode<OreInfo> BEDROCK_ORE = new ProspectorMode<>("metaitem.prospector.mode.bedrock_ore", 1) {
+    public static ProspectorMode<OreInfo> BEDROCK_ORE = new ProspectorMode<>("metaitem.prospector.mode.bedrock_ore",
+            1) {
+
         @Override
         public void scan(OreInfo[][][] storage, LevelChunk chunk) {
             if (chunk.getLevel() instanceof ServerLevel serverLevel) {
-                var oreVein = BedrockOreVeinSavedData.getOrCreate(serverLevel).getOreVeinWorldEntry(chunk.getPos().x, chunk.getPos().z);
+                var oreVein = BedrockOreVeinSavedData.getOrCreate(serverLevel).getOreVeinWorldEntry(chunk.getPos().x,
+                        chunk.getPos().z);
                 if (oreVein.getDefinition() != null) {
                     var left = 100 * oreVein.getOperationsRemaining() / BedrockOreVeinSavedData.MAXIMUM_VEIN_OPERATIONS;
-                    for (var entry : oreVein.getDefinition().getBedrockVeinMaterials()) {
-                        storage[0][0] = ArrayUtils.add(storage[0][0], new OreInfo(entry.getValue(), entry.getKey(), left, oreVein.getOreYield()));
+                    for (var entry : oreVein.getDefinition().materials()) {
+                        storage[0][0] = ArrayUtils.add(storage[0][0],
+                                new OreInfo(entry.getFirst(), entry.getSecond(), left, oreVein.getOreYield()));
                     }
                 }
             }
@@ -256,14 +272,19 @@ public abstract class ProspectorMode<T> {
             return item.material.getMaterialRGB();
         }
 
-
         @Override
         public IGuiTexture getItemIcon(OreInfo item) {
             Material material = item.material;
-            ItemStack stack = ChemicalHelper.get(TagPrefix.get(ConfigHolder.INSTANCE.machines.bedrockOreDropTagPrefix), material);
-            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.crushed, material); // backup 1: crushed; if raw ore doesn't exist
-            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.gem, material); // backup 2: gem; if crushed ore doesn't exist
-            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.ore, material); // backup 3: just fallback to normal ore...
+            ItemStack stack = ChemicalHelper.get(TagPrefix.get(ConfigHolder.INSTANCE.machines.bedrockOreDropTagPrefix),
+                    material);
+            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.crushed, material); // backup 1: crushed; if raw
+                                                                                          // ore doesn't exist
+            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.gem, material); // backup 2: gem; if crushed ore
+                                                                                      // doesn't exist
+            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.ore, material); // backup 3: ore; if gem doesn't
+                                                                                      // exist
+            if (stack.isEmpty()) stack = ChemicalHelper.get(TagPrefix.dust, material); // backup 4: just fallback to
+                                                                                       // dust...
             return new ItemStackTexture(stack).scale(0.8f);
         }
 
@@ -288,7 +309,9 @@ public abstract class ProspectorMode<T> {
         @Override
         public OreInfo deserialize(FriendlyByteBuf buf) {
             ResourceLocation materialId = buf.readResourceLocation();
-            return new OreInfo(GTCEuAPI.materialManager.getRegistry(materialId.getNamespace()).get(materialId.getPath()), buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
+            return new OreInfo(
+                    GTCEuAPI.materialManager.getRegistry(materialId.getNamespace()).get(materialId.getPath()),
+                    buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
         }
 
         @Override
@@ -302,32 +325,41 @@ public abstract class ProspectorMode<T> {
                 int totalWeight = Arrays.stream(array).mapToInt(OreInfo::weight).sum();
                 for (OreInfo item : array) {
                     float chance = (float) item.weight / totalWeight * 100;
-                    tooltips.add(Component.translatable(getDescriptionId(item)).append(" (").append(Component.translatable("gtceu.gui.content.chance_1", FormattingUtil.formatNumber2Places(chance))).append(") --- %s (%s%%)".formatted(item.yield, item.left)));
+                    tooltips.add(Component.translatable(getDescriptionId(item)).append(" (")
+                            .append(Component.translatable("gtceu.gui.content.chance_1",
+                                    FormattingUtil.formatNumber2Places(chance)))
+                            .append(") --- %s (%s%%)".formatted(item.yield, item.left)));
                 }
             }
         }
-
     };
 
     public final String unlocalizedName;
     public final int cellSize;
 
-    ProspectorMode(@Nonnull String unlocalizedName, int cellSize) {
+    ProspectorMode(@NotNull String unlocalizedName, int cellSize) {
         this.unlocalizedName = unlocalizedName;
         this.cellSize = cellSize;
     }
 
     public abstract void scan(T[][][] storage, LevelChunk chunk);
+
     public abstract int getItemColor(T item);
+
     public abstract IGuiTexture getItemIcon(T item);
+
     public abstract String getDescriptionId(T item);
+
     public abstract String getUniqueID(T item);
+
     public abstract void serialize(T item, FriendlyByteBuf buf);
+
     public abstract T deserialize(FriendlyByteBuf buf);
+
     public abstract Class<T> getItemClass();
+
     public abstract void appendTooltips(List<T[]> items, List<Component> tooltips, String selected);
 
     @OnlyIn(Dist.CLIENT)
-    public void drawSpecialGrid(GuiGraphics graphics, T[] items, int x, int y, int width, int height) {
-    }
+    public void drawSpecialGrid(GuiGraphics graphics, T[] items, int x, int y, int width, int height) {}
 }

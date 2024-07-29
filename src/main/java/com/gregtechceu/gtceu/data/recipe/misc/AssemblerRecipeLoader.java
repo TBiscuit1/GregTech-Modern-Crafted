@@ -1,6 +1,9 @@
 package com.gregtechceu.gtceu.data.recipe.misc;
 
+import com.gregtechceu.gtceu.config.ConfigHolder;
+
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.world.item.Items;
 
 import java.util.function.Consumer;
 
@@ -14,14 +17,13 @@ import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLER_RECIPES;
 public class AssemblerRecipeLoader {
 
     public static void init(Consumer<FinishedRecipe> provider) {
-
         // Gearbox-like
         ASSEMBLER_RECIPES.recipeBuilder("bronze_gearbox_casing")
                 .inputItems(plate, Bronze, 4)
                 .inputItems(gear, Bronze, 2)
                 .inputItems(frameGt, Bronze)
                 .circuitMeta(4)
-                .outputItems(CASING_BRONZE_GEARBOX.asStack(2))
+                .outputItems(CASING_BRONZE_GEARBOX.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
                 .duration(50).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("steel_gearbox_casing")
@@ -29,7 +31,7 @@ public class AssemblerRecipeLoader {
                 .inputItems(gear, Steel, 2)
                 .inputItems(frameGt, Steel)
                 .circuitMeta(4)
-                .outputItems(CASING_STEEL_GEARBOX.asStack(2))
+                .outputItems(CASING_STEEL_GEARBOX.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
                 .duration(50).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("stainless_steel_gearbox_casing")
@@ -37,7 +39,7 @@ public class AssemblerRecipeLoader {
                 .inputItems(gear, StainlessSteel, 2)
                 .inputItems(frameGt, StainlessSteel)
                 .circuitMeta(4)
-                .outputItems(CASING_STAINLESS_STEEL_GEARBOX.asStack(2))
+                .outputItems(CASING_STAINLESS_STEEL_GEARBOX.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
                 .duration(50).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("titanium_gearbox_casing")
@@ -45,7 +47,7 @@ public class AssemblerRecipeLoader {
                 .inputItems(gear, Titanium, 2)
                 .inputItems(frameGt, Titanium)
                 .circuitMeta(4)
-                .outputItems(CASING_TITANIUM_GEARBOX.asStack(2))
+                .outputItems(CASING_TITANIUM_GEARBOX.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
                 .duration(50).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("tungstensteel_gearbox_casing")
@@ -53,24 +55,23 @@ public class AssemblerRecipeLoader {
                 .inputItems(gear, TungstenSteel, 2)
                 .inputItems(frameGt, TungstenSteel)
                 .circuitMeta(4)
-                .outputItems(CASING_TUNGSTENSTEEL_GEARBOX.asStack(2))
+                .outputItems(CASING_TUNGSTENSTEEL_GEARBOX.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
                 .duration(50).EUt(16).save(provider);
 
         // Other
-        // TODO LCE/ECE
-        //ASSEMBLER_RECIPES.recipeBuilder("stable_titanium_casing")
-        //        .inputItems(rotor, Titanium, 2)
-        //        .inputItems(pipeNormalFluid, Titanium, 4)
-        //        .inputs(METAL_CASING.getItemVariant(TITANIUM_STABLE))
-        //        .outputItems(MULTIBLOCK_CASING.getItemVariant(ENGINE_INTAKE_CASING, 2))
-        //        .duration(50).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("stable_titanium_casing")
+                .inputItems(rotor, Titanium, 2)
+                .inputItems(pipeNormalFluid, Titanium, 4)
+                .inputItems(CASING_TITANIUM_STABLE.asStack())
+                .outputItems(CASING_ENGINE_INTAKE.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
+                .duration(50).EUt(16).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("stable_tungstensteel_casing")
-        //        .inputItems(rotor, TungstenSteel, 2)
-        //        .inputItems(pipeNormalFluid, TungstenSteel, 4)
-        //        .inputs(METAL_CASING.getItemVariant(TUNGSTENSTEEL_ROBUST))
-        //        .outputItems(MULTIBLOCK_CASING.getItemVariant(EXTREME_ENGINE_INTAKE_CASING, 2))
-        //        .duration(50).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("stable_tungstensteel_casing")
+                .inputItems(rotor, TungstenSteel, 2)
+                .inputItems(pipeNormalFluid, TungstenSteel, 4)
+                .inputItems(CASING_TUNGSTENSTEEL_ROBUST.asStack())
+                .outputItems(CASING_EXTREME_ENGINE_INTAKE.asStack(ConfigHolder.INSTANCE.recipes.casingsPerCraft))
+                .duration(50).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("spray_can_empty")
                 .inputItems(dust, Redstone)
@@ -79,49 +80,48 @@ public class AssemblerRecipeLoader {
                 .duration(200).EUt(VA[ULV]).save(provider);
 
         // TODO Foam Sprayer
-        //ASSEMBLER_RECIPES.recipeBuilder("foam_sprayer")
-        //        .inputItems(plate, Tin, 6)
-        //        .inputItems(SPRAY_EMPTY)
-        //        .inputItems(paneGlass.name(), 1)
-        //        .outputItems(FOAM_SPRAYER)
-        //        .duration(200).EUt(VA[ULV]).save(provider);
+        // ASSEMBLER_RECIPES.recipeBuilder("foam_sprayer")
+        // .inputItems(plate, Tin, 6)
+        // .inputItems(SPRAY_EMPTY)
+        // .inputItems(paneGlass.name(), 1)
+        // .outputItems(FOAM_SPRAYER)
+        // .duration(200).EUt(VA[ULV]).save(provider);
 
-        // TODO Matches/lighters recipes
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_lighter_invar")
-        //        .inputItems(plate, Invar, 2)
-        //        .inputItems(Items.FLINT)
-        //        .outputItems(TOOL_LIGHTER_INVAR)
-        //        .duration(256).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_lighter_invar")
+                .inputItems(plate, Invar, 2)
+                .inputItems(Items.FLINT)
+                .outputItems(TOOL_LIGHTER_INVAR)
+                .duration(256).EUt(16).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_lighter_platinum")
-        //        .inputItems(plate, Platinum, 2)
-        //        .inputItems(Items.FLINT)
-        //        .outputItems(TOOL_LIGHTER_PLATINUM)
-        //        .duration(256).EUt(256).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_lighter_platinum")
+                .inputItems(plate, Platinum, 2)
+                .inputItems(Items.FLINT)
+                .outputItems(TOOL_LIGHTER_PLATINUM)
+                .duration(256).EUt(256).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_matches_0")
-        //        .inputItems(bolt, Wood)
-        //        .inputItems(dustSmall, Phosphorus)
-        //        .outputItems(TOOL_MATCHES)
-        //        .duration(16).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_matches_0")
+                .inputItems(bolt, Wood)
+                .inputItems(dustSmall, Phosphorus)
+                .outputItems(TOOL_MATCHES)
+                .duration(16).EUt(16).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_matches_1")
-        //        .inputItems(bolt, Wood)
-        //        .inputItems(dustSmall, TricalciumPhosphate)
-        //        .outputItems(TOOL_MATCHES)
-        //        .duration(16).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_matches_1")
+                .inputItems(bolt, Wood)
+                .inputItems(dustSmall, TricalciumPhosphate)
+                .outputItems(TOOL_MATCHES)
+                .duration(16).EUt(16).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_matches_2")
-        //        .inputItems(bolt, Wood, 4)
-        //        .inputItems(dust, Phosphorus)
-        //        .outputItems(TOOL_MATCHES, 4)
-        //        .duration(64).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_matches_2")
+                .inputItems(bolt, Wood, 4)
+                .inputItems(dust, Phosphorus)
+                .outputItems(TOOL_MATCHES, 4)
+                .duration(64).EUt(16).save(provider);
 
-        //ASSEMBLER_RECIPES.recipeBuilder("tool_matches_3")
-        //        .inputItems(bolt, Wood, 4)
-        //        .inputItems(dust, TricalciumPhosphate)
-        //        .outputItems(TOOL_MATCHES, 4)
-        //        .duration(64).EUt(16).save(provider);
+        ASSEMBLER_RECIPES.recipeBuilder("tool_matches_3")
+                .inputItems(bolt, Wood, 4)
+                .inputItems(dust, TricalciumPhosphate)
+                .outputItems(TOOL_MATCHES, 4)
+                .duration(64).EUt(16).save(provider);
 
         ASSEMBLER_RECIPES.recipeBuilder("small_wood_pipe").duration(200).EUt(VA[LV])
                 .inputItems(plate, Wood)
@@ -165,7 +165,6 @@ public class AssemblerRecipeLoader {
                 .inputFluids(Glue.getFluid(10))
                 .outputItems(pipeLargeFluid, TreatedWood)
                 .save(provider);
-
 
         // Voltage Coils
         ASSEMBLER_RECIPES.recipeBuilder("voltage_coil_ulv").duration(200).EUt(VA[ULV])
@@ -238,6 +237,37 @@ public class AssemblerRecipeLoader {
                 .inputItems(plateDouble, TungstenCarbide, 2)
                 .inputFluids(TinAlloy.getFluid(L * 32))
                 .outputItems(NEUTRON_REFLECTOR)
+                .save(provider);
+
+        // hazmat pieces
+        ASSEMBLER_RECIPES.recipeBuilder("hazmat_boots").duration(200).EUt(VA[LV])
+                .inputItems(plate, Rubber, 4)
+                .inputItems(foil, Polyethylene, 2)
+                .inputItems(plate, PolyvinylChloride, 2)
+                .outputItems(HAZMAT_BOOTS)
+                .save(provider);
+
+        ASSEMBLER_RECIPES.recipeBuilder("hazmat_chestpiece").duration(200).EUt(VA[LV])
+                .inputItems(plate, Rubber, 2)
+                .inputItems(plate, PolyvinylChloride, 7)
+                .inputItems(plate, Lead, 3)
+                .outputItems(HAZMAT_CHESTPLATE)
+                .save(provider);
+
+        ASSEMBLER_RECIPES.recipeBuilder("hazmat_leggings").duration(200).EUt(VA[LV])
+                .inputItems(plate, Rubber, 2)
+                .inputItems(plate, PolyvinylChloride, 5)
+                .inputItems(rod, Iron, 2)
+                .inputItems(ring, Steel, 4)
+                .outputItems(HAZMAT_LEGGINGS)
+                .save(provider);
+
+        ASSEMBLER_RECIPES.recipeBuilder("hazmat_headpiece").duration(200).EUt(VA[LV])
+                .inputItems(MASK_FILTER)
+                .inputItems(plate, PolyvinylChloride, 4)
+                .inputItems(plate, Glass, 2)
+                .inputItems(ring, PolyvinylChloride, 1)
+                .outputItems(HAZMAT_HELMET)
                 .save(provider);
     }
 }

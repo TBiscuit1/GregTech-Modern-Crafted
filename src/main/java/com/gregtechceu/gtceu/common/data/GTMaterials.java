@@ -9,9 +9,12 @@ import com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlag;
 import com.gregtechceu.gtceu.api.data.chemical.material.stack.MaterialStack;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.materials.*;
+import com.gregtechceu.gtceu.utils.SupplierMemoizer;
+
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,21 +24,20 @@ import java.util.List;
 import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlags.*;
 import static com.gregtechceu.gtceu.api.data.tag.TagPrefix.*;
 
-
 /**
  * Material Registration.
  * <p>
  * All Material Builders should follow this general formatting:
  * <p>
  * material = new MaterialBuilder(id, name)
- * .ingot().fluid().ore()                <--- types
- * .color().iconSet()                    <--- appearance
- * .flags()                              <--- special generation
- * .element() / .components()            <--- composition
- * .toolStats()                          <---
- * .oreByProducts()                         | additional properties
- * ...                                   <---
- * .blastTemp()                          <--- blast temperature
+ * .ingot().fluid().ore() <--- types
+ * .color().iconSet() <--- appearance
+ * .flags() <--- special generation
+ * .element() / .components() <--- composition
+ * .toolStats() <---
+ * .oreByProducts() | additional properties
+ * ... <---
+ * .blastTemp() <--- blast temperature
  * .build();
  * <p>
  * Use defaults to your advantage! Some defaults:
@@ -46,69 +48,26 @@ public class GTMaterials {
 
     public static Material[] CHEMICAL_DYES;
     public static Material[] VOLTAGE_COMMON_MATERIALS;
-    public static void init() {
 
+    public static void init() {
         MarkerMaterials.register();
 
-        /*
-         * Ranges 1-249
-         */
         ElementMaterials.register();
-
-        /*
-         * Ranges 250-999
-         */
         FirstDegreeMaterials.register();
-
-        /*
-         * Ranges 1000-1499
-         */
         OrganicChemistryMaterials.register();
-
-        /*
-         * Ranges 1500-1999
-         */
         UnknownCompositionMaterials.register();
-
-        /*
-         * Ranges 2000-2499
-         */
         SecondDegreeMaterials.register();
-
-        /*
-         * Ranges 2500-2999
-         */
         HigherDegreeMaterials.register();
+
+        // Gregicality Multiblocks
+        GCyMMaterials.register();
 
         /*
          * Register info for cyclical references
          */
         MaterialFlagAddition.register();
 
-        /*
-         * FOR ADDON DEVELOPERS:
-         *
-         * GTCEu will not take more than 3000 IDs. Anything past ID 2999
-         * is considered FAIR GAME, take whatever you like.
-         *
-         * If you would like to reserve IDs, feel free to reach out to the
-         * development team and claim a range of IDs! We will mark any
-         * claimed ranges below this comment. Max value is 32767.
-         *
-         * - Gregicality: 3000-19999
-         * - Gregification: 20000-20999
-         * - HtmlTech: 21000-21499
-         * - GregTech Food Option: 21500-21999
-         * - PCM's Ore Addon: 22000-23599
-         * - MechTech: 23600-23999
-         * - FREE RANGE 24000-31999
-         * - Reserved for CraftTweaker: 32000-32767
-         */
-
-        //Gregicality Multiblocks
-        GCyMMaterials.register();
-
-        CHEMICAL_DYES = new Material[]{
+        CHEMICAL_DYES = new Material[] {
                 DyeWhite, DyeOrange,
                 DyeMagenta, DyeLightBlue,
                 DyeYellow, DyeLime,
@@ -189,24 +148,31 @@ public class GTMaterials {
         block.setIgnored(Bone, Blocks.BONE_BLOCK);
         block.setIgnored(NetherQuartz, Blocks.QUARTZ_BLOCK);
         block.setIgnored(Ice, Blocks.ICE);
-        block.setIgnored(Concrete, Blocks.WHITE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE,
-                Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.BLUE_CONCRETE,
+        block.setIgnored(Concrete, Blocks.WHITE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE,
+                Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE,
+                Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.CYAN_CONCRETE,
+                Blocks.PURPLE_CONCRETE, Blocks.BLUE_CONCRETE,
                 Blocks.BROWN_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.RED_CONCRETE, Blocks.BLACK_CONCRETE);
         block.setIgnored(Blaze);
         block.setIgnored(Lapotron);
 
-        rock.setIgnored(Marble);
+        rock.setIgnored(Marble, SupplierMemoizer.memoizeBlockSupplier(() -> GTBlocks.MARBLE.get()));
         rock.setIgnored(Granite, Blocks.GRANITE);
         rock.setIgnored(Granite, Blocks.POLISHED_GRANITE);
-        rock.setIgnored(GraniteRed);
+        rock.setIgnored(GraniteRed, SupplierMemoizer.memoizeBlockSupplier(() -> GTBlocks.RED_GRANITE.get()));
         rock.setIgnored(Andesite, Blocks.ANDESITE);
         rock.setIgnored(Andesite, Blocks.POLISHED_ANDESITE);
         rock.setIgnored(Diorite, Blocks.DIORITE);
         rock.setIgnored(Diorite, Blocks.POLISHED_DIORITE);
         rock.setIgnored(Stone, Blocks.STONE);
+        rock.setIgnored(Calcite, Blocks.CALCITE);
         rock.setIgnored(Netherrack, Blocks.NETHERRACK);
         rock.setIgnored(Obsidian, Blocks.OBSIDIAN);
         rock.setIgnored(Endstone, Blocks.END_STONE);
+        rock.setIgnored(Deepslate, Blocks.DEEPSLATE);
+        rock.setIgnored(Basalt, Blocks.BASALT);
+        block.setIgnored(Concrete, SupplierMemoizer.memoizeBlockSupplier(() -> GTBlocks.LIGHT_CONCRETE.get()));
+        block.setIgnored(Concrete, SupplierMemoizer.memoizeBlockSupplier(() -> GTBlocks.DARK_CONCRETE.get()));
 
         for (TagPrefix prefix : ORES.keySet()) {
             TagPrefix.OreType oreType = ORES.get(prefix);
@@ -218,8 +184,10 @@ public class GTMaterials {
         crushed.addSecondaryMaterial(new MaterialStack(Stone, dust.materialAmount()));
 
         toolHeadDrill.addSecondaryMaterial(new MaterialStack(Steel, plate.materialAmount() * 4));
-        toolHeadChainsaw.addSecondaryMaterial(new MaterialStack(Steel, plate.materialAmount() * 4 + ring.materialAmount() * 2));
-        toolHeadWrench.addSecondaryMaterial(new MaterialStack(Steel, ring.materialAmount() + screw.materialAmount() * 2));
+        toolHeadChainsaw
+                .addSecondaryMaterial(new MaterialStack(Steel, plate.materialAmount() * 4 + ring.materialAmount() * 2));
+        toolHeadWrench
+                .addSecondaryMaterial(new MaterialStack(Steel, ring.materialAmount() + screw.materialAmount() * 2));
 
         pipeTinyFluid.setIgnored(Wood);
         pipeHugeFluid.setIgnored(Wood);
@@ -275,14 +243,6 @@ public class GTMaterials {
         rawOreBlock.setIgnored(Gold, Blocks.RAW_GOLD_BLOCK);
         rawOreBlock.setIgnored(Iron, Blocks.RAW_IRON_BLOCK);
         rawOreBlock.setIgnored(Copper, Blocks.RAW_COPPER_BLOCK);
-
-        // TODO GT stone types, move out of this file
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.BLACK_GRANITE, 1), TagPrefix.stone, Deepslate);
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.RED_GRANITE, 1), TagPrefix.stone, GraniteRed);
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.MARBLE, 1), TagPrefix.stone, Marble);
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.BASALT, 1), TagPrefix.stone, Basalt);
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.CONCRETE_LIGHT, 1), TagPrefix.block, Concrete);
-        //ChemicalHelper.registerUnificationEntry(MetaBlocks.STONE_SMOOTH.getItemVariant(BlockStoneSmooth.BlockType.CONCRETE_DARK, 1), TagPrefix.block, Concrete);
 
         block.modifyMaterialAmount(Amethyst, 4);
         block.modifyMaterialAmount(Glowstone, 4);
@@ -545,7 +505,6 @@ public class GTMaterials {
     public static Material Tantalite;
     public static Material Coke;
 
-
     public static Material SolderingAlloy;
     public static Material Spessartine;
     public static Material Sphalerite;
@@ -633,6 +592,7 @@ public class GTMaterials {
     public static Material HydrofluoricAcid;
     public static Material NitricOxide;
     public static Material Iron3Chloride;
+    public static Material Iron2Chloride;
     public static Material UraniumHexafluoride;
     public static Material EnrichedUraniumHexafluoride;
     public static Material DepletedUraniumHexafluoride;
@@ -672,6 +632,29 @@ public class GTMaterials {
     public static Material EnrichedNaquadahSulfate;
     public static Material NaquadriaSulfate;
     public static Material Pyrochlore;
+    public static Material PotassiumHydroxide;
+    public static Material PotassiumIodide;
+    public static Material PotassiumFerrocyanide;
+    public static Material CalciumFerrocyanide;
+    public static Material CalciumHydroxide;
+    public static Material CalciumCarbonate;
+    public static Material PotassiumCyanide;
+    public static Material PotassiumCarbonate;
+    public static Material HydrogenCyanide;
+    public static Material FormicAcid;
+    public static Material PotassiumSulfate;
+    public static Material PrussianBlue;
+    public static Material Formaldehyde;
+    public static Material Glycolonitrile;
+    public static Material DiethylenetriaminePentaacetonitrile;
+    public static Material DiethylenetriaminepentaaceticAcid;
+    public static Material SodiumNitrite;
+
+    public static Material AcidicBromineSolution;
+    public static Material ConcentratedBromineSolution;
+    public static Material Iodide;
+    public static Material IodineSolution;
+    public static Material DiluteIodineSolution;
 
     /**
      * Organic chemistry
@@ -755,6 +738,11 @@ public class GTMaterials {
     public static Material PolyvinylButyral;
     public static Material Biphenyl;
     public static Material PolychlorinatedBiphenyl;
+    public static Material AceticAnhydride;
+    public static Material AminoPhenol;
+    public static Material Paracetamol;
+    public static Material AmmoniumFormate;
+    public static Material Formamide;
 
     /**
      * Not possible to determine exact Components
@@ -918,6 +906,7 @@ public class GTMaterials {
     public static Material Pitchblende;
     public static Material Monazite;
     public static Material Mirabilite;
+    public static Material ActivatedCarbon;
     public static Material Trona;
     public static Material Gypsum;
     public static Material Zeolite;
@@ -944,6 +933,13 @@ public class GTMaterials {
     public static Material SaltWater;
     public static Material Clay;
     public static Material Redstone;
+    public static Material Dichloroethane;
+    public static Material Diethylenetriamine;
+
+    public static Material RawBrine;
+    public static Material DebrominatedBrine;
+    public static Material BrominatedChlorineVapor;
+    public static Material AcidicBromineExhaust;
 
     /**
      * Third Degree Materials
@@ -964,6 +960,11 @@ public class GTMaterials {
     public static Material Fireclay;
     public static Material Diorite;
 
+    public static Material HotBrine;
+    public static Material HotChlorinatedBrominatedBrine;
+    public static Material HotDebrominatedBrine;
+    public static Material HotAlkalineDebrominatedBrine;
+
     /**
      * Fourth Degree Materials
      */
@@ -972,6 +973,7 @@ public class GTMaterials {
     public static Material BasalticMineralSand;
     public static Material HSSE;
     public static Material HSSS;
+    public static Material RadAway;
 
     /**
      * GCyM Materials
@@ -988,6 +990,4 @@ public class GTMaterials {
     public static Material TitaniumCarbide;
     public static Material TitaniumTungstenCarbide;
     public static Material HastelloyC276;
-
-
 }

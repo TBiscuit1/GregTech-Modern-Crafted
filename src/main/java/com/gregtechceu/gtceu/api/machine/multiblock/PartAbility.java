@@ -1,11 +1,11 @@
 package com.gregtechceu.gtceu.api.machine.multiblock;
 
+import net.minecraft.world.level.block.Block;
+
 import com.google.common.base.Suppliers;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.Getter;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
@@ -15,22 +15,23 @@ import java.util.function.Supplier;
  * @author KilaBash
  * @date 2023/3/4
  * @implNote MultiblockAbility
- * Fine, It's not really needed。It used to specify which blocks are available.
- * Only registered blocks can be used as part of gtceu's multiblock.
+ *           Fine, It's not really needed。It used to specify which blocks are available.
+ *           Only registered blocks can be used as part of gtceu's multiblock.
  */
 public class PartAbility {
+
     public static final PartAbility EXPORT_ITEMS = new PartAbility("export_items");
     public static final PartAbility IMPORT_ITEMS = new PartAbility("import_items");
     public static final PartAbility EXPORT_FLUIDS = new PartAbility("export_fluids");
     public static final PartAbility IMPORT_FLUIDS = new PartAbility("import_fluids");
-    
+
     public static final PartAbility EXPORT_FLUIDS_1X = new PartAbility("export_fluids_1x");
     public static final PartAbility IMPORT_FLUIDS_1X = new PartAbility("import_fluids_1x");
     public static final PartAbility EXPORT_FLUIDS_4X = new PartAbility("export_fluids_4x");
     public static final PartAbility IMPORT_FLUIDS_4X = new PartAbility("import_fluids_4x");
     public static final PartAbility EXPORT_FLUIDS_9X = new PartAbility("export_fluids_9x");
     public static final PartAbility IMPORT_FLUIDS_9X = new PartAbility("import_fluids_9x");
-    
+
     public static final PartAbility INPUT_ENERGY = new PartAbility("input_energy");
     public static final PartAbility OUTPUT_ENERGY = new PartAbility("output_energy");
     public static final PartAbility SUBSTATION_INPUT_ENERGY = new PartAbility("substation_input_energy");
@@ -50,14 +51,23 @@ public class PartAbility {
     public static final PartAbility INPUT_LASER = new PartAbility("input_laser");
     public static final PartAbility OUTPUT_LASER = new PartAbility("output_laser");
 
+    public static final PartAbility COMPUTATION_DATA_RECEPTION = new PartAbility("computation_data_reception");
+    public static final PartAbility COMPUTATION_DATA_TRANSMISSION = new PartAbility("computation_data_transmission");
+    public static final PartAbility OPTICAL_DATA_RECEPTION = new PartAbility("optical_data_reception");
+    public static final PartAbility OPTICAL_DATA_TRANSMISSION = new PartAbility("optical_data_transmission");
+
+    public static final PartAbility DATA_ACCESS = new PartAbility("data_access");
+
+    public static final PartAbility HPCA_COMPONENT = new PartAbility("hpca_component");
+    public static final PartAbility OBJECT_HOLDER = new PartAbility("object_holder");
+
     /**
      * tier -> available blocks
      */
     private final Int2ObjectMap<Set<Block>> registry = new Int2ObjectOpenHashMap<>();
 
-    private Supplier<Collection<Block>> allBlocks = Suppliers.memoize(() ->
-        registry.values().stream().flatMap(Collection::stream).toList()
-    );
+    private Supplier<Collection<Block>> allBlocks = Suppliers
+            .memoize(() -> registry.values().stream().flatMap(Collection::stream).toList());
 
     @Getter
     private final String name;
@@ -94,5 +104,4 @@ public class PartAbility {
                 .flatMap(entry -> entry.getValue().stream())
                 .toList();
     }
-
 }

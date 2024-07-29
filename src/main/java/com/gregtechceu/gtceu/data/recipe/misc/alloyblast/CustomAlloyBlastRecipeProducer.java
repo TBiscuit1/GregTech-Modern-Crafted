@@ -1,10 +1,10 @@
 package com.gregtechceu.gtceu.data.recipe.misc.alloyblast;
 
-import com.google.common.base.Preconditions;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.data.recipe.builder.GTRecipeBuilder;
 
-import javax.annotation.Nonnull;
+import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.NotNull;
 
 public class CustomAlloyBlastRecipeProducer extends AlloyBlastRecipeProducer {
 
@@ -15,7 +15,8 @@ public class CustomAlloyBlastRecipeProducer extends AlloyBlastRecipeProducer {
     /**
      * @param circuitNum    the custom circuit number to use
      * @param gasCircuitNum the custom gas circuit number to use
-     * @param outputAmount  the custom output amount in quantities of {@link com.gregtechceu.gtceu.api.data.tag.TagPrefix#ingot}
+     * @param outputAmount  the custom output amount in quantities of
+     *                      {@link com.gregtechceu.gtceu.api.data.tag.TagPrefix#ingot}
      *                      / {@link com.gregtechceu.gtceu.api.GTValues#M}) to use
      */
     public CustomAlloyBlastRecipeProducer(int circuitNum, int gasCircuitNum, int outputAmount) {
@@ -26,7 +27,7 @@ public class CustomAlloyBlastRecipeProducer extends AlloyBlastRecipeProducer {
     }
 
     @Override
-    protected int addInputs(@Nonnull Material material, @Nonnull GTRecipeBuilder builder) {
+    protected int addInputs(@NotNull Material material, @NotNull GTRecipeBuilder builder) {
         int amount = super.addInputs(material, builder); // always must be called
         return this.outputAmount < 0 ? amount : this.outputAmount;
     }

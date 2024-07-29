@@ -1,14 +1,17 @@
 package com.gregtechceu.gtceu.utils;
 
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
+
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
+
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class OverlayingFluidStorage implements IFluidStorage {
+
     private final IFluidTransfer transfer;
     private final int tank;
 
@@ -41,7 +44,7 @@ public class OverlayingFluidStorage implements IFluidStorage {
     @Override
     public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         if (transfer instanceof NotifiableFluidTank notifiable) {
-            return notifiable.storages[this.tank].fill(resource, simulate, notifyChanges);
+            return notifiable.getStorages()[this.tank].fill(resource, simulate, notifyChanges);
         }
         return transfer.fill(this.tank, resource, simulate, notifyChanges);
     }
@@ -55,7 +58,7 @@ public class OverlayingFluidStorage implements IFluidStorage {
     @Override
     public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         if (transfer instanceof NotifiableFluidTank notifiable) {
-            return notifiable.storages[this.tank].drain(resource, simulate, notifyChanges);
+            return notifiable.getStorages()[this.tank].drain(resource, simulate, notifyChanges);
         }
         return transfer.drain(this.tank, resource, simulate, notifyChanges);
     }

@@ -2,8 +2,8 @@ package com.gregtechceu.gtceu.common.blockentity;
 
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.blockentity.PipeBlockEntity;
+import com.gregtechceu.gtceu.api.capability.GTCapability;
 import com.gregtechceu.gtceu.api.capability.ICoverable;
-import com.gregtechceu.gtceu.api.capability.forge.GTCapability;
 import com.gregtechceu.gtceu.api.cover.CoverBehavior;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.FluidPipeProperties;
 import com.gregtechceu.gtceu.api.fluids.FluidConstants;
@@ -11,18 +11,24 @@ import com.gregtechceu.gtceu.api.fluids.FluidState;
 import com.gregtechceu.gtceu.api.fluids.GTFluid;
 import com.gregtechceu.gtceu.api.fluids.attribute.FluidAttribute;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
+import com.gregtechceu.gtceu.api.machine.feature.IDataInfoProvider;
 import com.gregtechceu.gtceu.common.cover.PumpCover;
 import com.gregtechceu.gtceu.common.cover.data.ManualIOMode;
+import com.gregtechceu.gtceu.common.item.PortableScannerBehavior;
 import com.gregtechceu.gtceu.common.pipelike.fluidpipe.FluidPipeType;
 import com.gregtechceu.gtceu.common.pipelike.fluidpipe.PipeTankList;
 import com.gregtechceu.gtceu.utils.EntityDamageUtil;
+import com.gregtechceu.gtceu.utils.FormattingUtil;
 import com.gregtechceu.gtceu.utils.GTUtil;
+
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.forge.FluidHelperImpl;
 import com.lowdragmc.lowdraglib.side.fluid.forge.FluidTransferHelperImpl;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -30,6 +36,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -47,6 +54,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +62,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPipeProperties> {
+public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPipeProperties>
+                                  implements IDataInfoProvider {
+
     public static final int FREQUENCY = 5;
 
     public byte lastReceivedFrom = 0, oldLastReceivedFrom = 0;
@@ -70,8 +80,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
         super(type, pos, blockState);
     }
 
-    public static void onBlockEntityRegister(BlockEntityType<FluidPipeBlockEntity> fluidPipeBlockEntityBlockEntityType) {
-    }
+    public static void onBlockEntityRegister(BlockEntityType<FluidPipeBlockEntity> fluidPipeBlockEntityBlockEntityType) {}
 
     public long getOffsetTimer() {
         return timer + offset;
@@ -100,7 +109,8 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             if (level.getBlockEntity(getBlockPos().relative(side)) instanceof FluidPipeBlockEntity) {
                 return false;
             }
-            return FluidTransferHelper.getFluidTransfer(level, getBlockPos().relative(side), side.getOpposite()) != null;
+            return FluidTransferHelper.getFluidTransfer(level, getBlockPos().relative(side), side.getOpposite()) !=
+                    null;
         }
         return false;
     }
@@ -113,7 +123,8 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
                 PipeTankList tankList = getTankList(facing);
                 if (tankList == null)
                     return LazyOptional.empty();
-                return ForgeCapabilities.FLUID_HANDLER.orEmpty(capability, LazyOptional.of(() -> FluidTransferHelperImpl.toFluidHandler(tankList)));
+                return ForgeCapabilities.FLUID_HANDLER.orEmpty(capability,
+                        LazyOptional.of(() -> FluidTransferHelperImpl.toFluidHandler(tankList)));
             }
         } else if (capability == GTCapability.CAPABILITY_COVERABLE) {
             return GTCapability.CAPABILITY_COVERABLE.orEmpty(capability, LazyOptional.of(this::getCoverContainer));
@@ -176,7 +187,8 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
 
             BlockEntity neighbor = getNeighbor(facing);
             if (neighbor == null) continue;
-            IFluidHandler handler = neighbor.getCapability(ForgeCapabilities.FLUID_HANDLER, facing.getOpposite()).resolve().orElse(null);
+            IFluidHandler handler = neighbor.getCapability(ForgeCapabilities.FLUID_HANDLER, facing.getOpposite())
+                    .resolve().orElse(null);
             IFluidTransfer fluidHandler = handler == null ? null : FluidTransferHelperImpl.toFluidTransfer(handler);
             if (fluidHandler == null) continue;
 
@@ -189,7 +201,8 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
                 // Shutter covers return null capability when active, so check here to prevent NPE
                 if (pipeTank == null || checkForPumpCover(cover)) continue;
             } else {
-                ICoverable coverable = neighbor.getCapability(GTCapability.CAPABILITY_COVERABLE, facing.getOpposite()).resolve().orElse(null);
+                ICoverable coverable = neighbor.getCapability(GTCapability.CAPABILITY_COVERABLE, facing.getOpposite())
+                        .resolve().orElse(null);
                 if (coverable != null) {
                     cover = coverable.getCoverAtSide(facing.getOpposite());
                     if (checkForPumpCover(cover)) continue;
@@ -219,7 +232,11 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
         // Now distribute
         for (FluidTransaction transaction : tanks) {
             if (availableCapacity > maxAmount) {
-                transaction.amount = Mth.floor(transaction.amount * maxAmount / availableCapacity); // Distribute fluids based on percentage available space at destination
+                transaction.amount = Mth.floor(transaction.amount * maxAmount / availableCapacity); // Distribute fluids
+                                                                                                    // based on
+                                                                                                    // percentage
+                                                                                                    // available space
+                                                                                                    // at destination
             }
             if (transaction.amount == 0) {
                 if (tank.getFluidAmount() <= 0) break; // If there is no more stored fluid, stop transferring to prevent
@@ -258,7 +275,8 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
         net.minecraftforge.fluids.FluidStack forgeStack = FluidHelperImpl.toFluidStack(stack);
         boolean burning = prop.getMaxFluidTemperature() < fluid.getFluidType().getTemperature(forgeStack);
         boolean leaking = !prop.isGasProof() && fluid.getFluidType().getDensity(forgeStack) < 0;
-        boolean shattering = !prop.isCryoProof() && fluid.getFluidType().getTemperature() < FluidConstants.CRYOGENIC_FLUID_THRESHOLD;
+        boolean shattering = !prop.isCryoProof() &&
+                fluid.getFluidType().getTemperature() < FluidConstants.CRYOGENIC_FLUID_THRESHOLD;
         boolean corroding = false;
         boolean melting = false;
 
@@ -296,7 +314,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
 
         if (isLeaking) {
             FluidPipeBlockEntity.spawnParticles(level, worldPosition, Direction.UP, ParticleTypes.SMOKE,
-                7 + GTValues.RNG.nextInt(2));
+                    7 + GTValues.RNG.nextInt(2));
 
             // voids 10%
             stack.setAmount(Math.max(0, stack.getAmount() * 9 / 10));
@@ -304,10 +322,11 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             // apply heat damage in area surrounding the pipe
             if (getOffsetTimer() % 20 == 0) {
                 List<LivingEntity> entities = getPipeLevel().getEntitiesOfClass(LivingEntity.class,
-                    new AABB(getPipePos()).inflate(2));
+                        new AABB(getPipePos()).inflate(2));
                 for (LivingEntity entityLivingBase : entities) {
-                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase, stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
-                        2.0F, 10);
+                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase,
+                            stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
+                            2.0F, 10);
                 }
             }
 
@@ -319,7 +338,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
 
         if (isCorroding) {
             FluidPipeBlockEntity.spawnParticles(getPipeLevel(), getPipePos(), Direction.UP, ParticleTypes.CRIT,
-                3 + GTValues.RNG.nextInt(2));
+                    3 + GTValues.RNG.nextInt(2));
 
             // voids 25%
             stack.setAmount(Math.max(0, stack.getAmount() * 3 / 4));
@@ -327,7 +346,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             // apply chemical damage in area surrounding the pipe
             if (getOffsetTimer() % 20 == 0) {
                 List<LivingEntity> entities = getPipeLevel().getEntitiesOfClass(LivingEntity.class,
-                    new AABB(getPipePos()).inflate(1));
+                        new AABB(getPipePos()).inflate(1));
                 for (LivingEntity entityLivingBase : entities) {
                     EntityDamageUtil.applyChemicalDamage(entityLivingBase, 2);
                 }
@@ -342,7 +361,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
 
         if (isBurning || isMelting) {
             FluidPipeBlockEntity.spawnParticles(level, getBlockPos(), Direction.UP, ParticleTypes.FLAME,
-                (isMelting ? 7 : 3) + GTValues.RNG.nextInt(2));
+                    (isMelting ? 7 : 3) + GTValues.RNG.nextInt(2));
 
             // voids 75%
             stack.setAmount(Math.max(0, stack.getAmount() / 4));
@@ -355,10 +374,11 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             // apply heat damage in area surrounding the pipe
             if (isMelting && getOffsetTimer() % 20 == 0) {
                 List<LivingEntity> entities = getPipeLevel().getEntitiesOfClass(LivingEntity.class,
-                    new AABB(getPipePos()).inflate(2));
+                        new AABB(getPipePos()).inflate(2));
                 for (LivingEntity entityLivingBase : entities) {
-                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase, stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
-                        2.0F, 10);
+                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase,
+                            stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
+                            2.0F, 10);
                 }
             }
 
@@ -371,7 +391,7 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
 
         if (isShattering) {
             FluidPipeBlockEntity.spawnParticles(level, getBlockPos(), Direction.UP, ParticleTypes.CLOUD,
-                3 + GTValues.RNG.nextInt(2));
+                    3 + GTValues.RNG.nextInt(2));
 
             // voids 75%
             stack.setAmount(Math.max(0, stack.getAmount() / 4));
@@ -379,10 +399,11 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             // apply frost damage in area surrounding the pipe
             if (getOffsetTimer() % 20 == 0) {
                 List<LivingEntity> entities = getPipeLevel().getEntitiesOfClass(LivingEntity.class,
-                    new AABB(getPipePos()).inflate(2));
+                        new AABB(getPipePos()).inflate(2));
                 for (LivingEntity entityLivingBase : entities) {
-                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase, stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
-                        2.0F, 10);
+                    EntityDamageUtil.applyTemperatureDamage(entityLivingBase,
+                            stack.getFluid().getFluidType().getTemperature(FluidHelperImpl.toFluidStack(stack)),
+                            2.0F, 10);
                 }
             }
 
@@ -478,14 +499,14 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
                                       int particleCount) {
         if (worldIn instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(particleType,
-                pos.getX() + 0.5,
-                pos.getY() + 0.5,
-                pos.getZ() + 0.5,
-                particleCount,
-                direction.getStepX() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
-                direction.getStepY() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
-                direction.getStepZ() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
-                0.1);
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
+                    particleCount,
+                    direction.getStepX() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
+                    direction.getStepY() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
+                    direction.getStepZ() * 0.2 + GTValues.RNG.nextDouble() * 0.1,
+                    0.1);
         }
     }
 
@@ -495,10 +516,45 @@ public class FluidPipeBlockEntity extends PipeBlockEntity<FluidPipeType, FluidPi
             BlockPos blockPos = selfPos.relative(side);
             BlockState blockState = world.getBlockState(blockPos);
             if (world.isEmptyBlock(blockPos) ||
-                blockState.isFlammable(world, blockPos, side.getOpposite())) {
+                    blockState.isFlammable(world, blockPos, side.getOpposite())) {
                 world.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
             }
         }
+    }
+
+    @Override
+    public @NotNull List<Component> getDataInfo(PortableScannerBehavior.DisplayMode mode) {
+        List<Component> list = new ArrayList<>();
+
+        if (mode == PortableScannerBehavior.DisplayMode.SHOW_ALL ||
+                mode == PortableScannerBehavior.DisplayMode.SHOW_MACHINE_INFO) {
+            FluidStack[] fluids = getContainedFluids();
+            if (fluids != null) {
+                boolean allTanksEmpty = true;
+                for (int i = 0; i < fluids.length; i++) {
+                    if (fluids[i] != null) {
+                        if (fluids[i].getFluid() == null || fluids[i].isEmpty()) {
+                            continue;
+                        }
+
+                        allTanksEmpty = false;
+                        list.add(Component.translatable("behavior.portable_scanner.tank", i,
+                                Component.translatable(FormattingUtil.formatNumbers(fluids[i].getAmount()))
+                                        .withStyle(ChatFormatting.GREEN),
+                                Component.translatable(FormattingUtil.formatNumbers(getCapacityPerTank()))
+                                        .withStyle(ChatFormatting.YELLOW),
+                                fluids[i].getDisplayName().copy()
+                                        .withStyle(ChatFormatting.GOLD)));
+                    }
+                }
+
+                if (allTanksEmpty) {
+                    list.add(Component.translatable("behavior.portable_scanner.tanks_empty"));
+                }
+            }
+        }
+
+        return list;
     }
 
     private static class FluidTransaction {

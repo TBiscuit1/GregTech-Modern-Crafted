@@ -5,12 +5,15 @@ import com.gregtechceu.gtceu.api.data.worldgen.bedrockfluid.BedrockFluidDefiniti
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.common.data.GTItems;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
-import com.lowdragmc.lowdraglib.emi.ModularUIEmiRecipeCategory;
-import dev.emi.emi.api.EmiRegistry;
-import dev.emi.emi.api.stack.EmiStack;
+
 import net.minecraft.network.chat.Component;
 
-public class GTBedrockFluidEmiCategory extends ModularUIEmiRecipeCategory {
+import dev.emi.emi.api.EmiRegistry;
+import dev.emi.emi.api.recipe.EmiRecipeCategory;
+import dev.emi.emi.api.stack.EmiStack;
+
+public class GTBedrockFluidEmiCategory extends EmiRecipeCategory {
+
     public static final GTBedrockFluidEmiCategory CATEGORY = new GTBedrockFluidEmiCategory();
 
     public GTBedrockFluidEmiCategory() {

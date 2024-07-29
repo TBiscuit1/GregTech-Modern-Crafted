@@ -3,7 +3,8 @@ package com.gregtechceu.gtceu.api.data.chemical.material.stack;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Objects;
 
 public class UnificationEntry {
@@ -35,21 +36,17 @@ public class UnificationEntry {
 
     @Override
     public int hashCode() {
-        int result = tagPrefix.hashCode();
+        int result = (tagPrefix != null ? tagPrefix.hashCode() : 0);
         result = 31 * result + (material != null ? material.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return tagPrefix.name + (material != null ? material.toCamelCaseString() : "");
+        return (tagPrefix != null ? tagPrefix.name : "") + (material != null ? material.toCamelCaseString() : "");
     }
 
-    public static class EmptyMapMarkerEntry extends UnificationEntry {
-
-        public EmptyMapMarkerEntry() {
-            super(null);
-        }
+    public static final UnificationEntry EmptyMapMarkerEntry = new UnificationEntry(null) {
 
         @Override
         public boolean equals(Object o) {
@@ -65,5 +62,5 @@ public class UnificationEntry {
         public String toString() {
             return "EMPTY UNIFICATION ENTRY";
         }
-    }
+    };
 }

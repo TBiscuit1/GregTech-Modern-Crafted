@@ -1,11 +1,11 @@
 package com.gregtechceu.gtceu.common.recipe;
 
-import com.google.gson.JsonObject;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeCondition;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
+
 import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
-import lombok.NoArgsConstructor;
+
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -14,7 +14,9 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
-import javax.annotation.Nonnull;
+import com.google.gson.JsonObject;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author KilaBash
@@ -43,7 +45,8 @@ public class BiomeCondition extends RecipeCondition {
 
     @Override
     public Component getTooltips() {
-        return Component.translatable("recipe.condition.biome.tooltip", LocalizationUtils.format("biome.%s.%s", biome.getNamespace(), biome.getPath()));
+        return Component.translatable("recipe.condition.biome.tooltip",
+                LocalizationUtils.format("biome.%s.%s", biome.getNamespace(), biome.getPath()));
     }
 
     public ResourceLocation getBiome() {
@@ -51,7 +54,7 @@ public class BiomeCondition extends RecipeCondition {
     }
 
     @Override
-    public boolean test(@Nonnull GTRecipe recipe, @Nonnull RecipeLogic recipeLogic) {
+    public boolean test(@NotNull GTRecipe recipe, @NotNull RecipeLogic recipeLogic) {
         Level level = recipeLogic.machine.self().getLevel();
         if (level == null) return false;
         Holder<Biome> biome = level.getBiome(recipeLogic.machine.self().getPos());
@@ -63,7 +66,7 @@ public class BiomeCondition extends RecipeCondition {
         return new BiomeCondition();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public JsonObject serialize() {
         JsonObject config = super.serialize();
@@ -72,7 +75,7 @@ public class BiomeCondition extends RecipeCondition {
     }
 
     @Override
-    public RecipeCondition deserialize(@Nonnull JsonObject config) {
+    public RecipeCondition deserialize(@NotNull JsonObject config) {
         super.deserialize(config);
         biome = new ResourceLocation(
                 GsonHelper.getAsString(config, "biome", "dummy"));
@@ -91,5 +94,4 @@ public class BiomeCondition extends RecipeCondition {
         super.toNetwork(buf);
         buf.writeUtf(biome.toString());
     }
-
 }

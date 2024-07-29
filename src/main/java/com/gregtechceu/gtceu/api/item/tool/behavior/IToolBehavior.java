@@ -1,8 +1,8 @@
 package com.gregtechceu.gtceu.api.item.tool.behavior;
 
 import com.gregtechceu.gtceu.api.item.IGTTool;
+
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -18,8 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 /**
@@ -27,17 +28,14 @@ import java.util.List;
  */
 public interface IToolBehavior {
 
-    default void init(IGTTool toolItem) {
-
-    }
+    default void init(IGTTool toolItem) {}
 
     /**
      * @param stack    The current ItemStack
      * @param target   the entity being hit
      * @param attacker the entity hitting the other
      */
-    default void hitEntity(@Nonnull ItemStack stack, @Nonnull LivingEntity target, @Nonnull LivingEntity attacker) {
-    }
+    default void hitEntity(@NotNull ItemStack stack, @NotNull LivingEntity target, @NotNull LivingEntity attacker) {}
 
     /**
      * Called before a block is broken.
@@ -48,8 +46,7 @@ public interface IToolBehavior {
      * @param pos    Block's position in world
      * @param player The Player that is wielding the item
      */
-    default void onBlockStartBreak(@Nonnull ItemStack stack, @Nonnull BlockPos pos, @Nonnull Player player) {
-    }
+    default void onBlockStartBreak(@NotNull ItemStack stack, @NotNull BlockPos pos, @NotNull Player player) {}
 
     /**
      * Called when a Block is destroyed using this Item.
@@ -60,8 +57,8 @@ public interface IToolBehavior {
      * @param pos          The position of the destroyed block
      * @param entityLiving the entity destroying the block
      */
-    default void onBlockDestroyed(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull BlockState state, @Nonnull BlockPos pos, @Nonnull LivingEntity entityLiving) {
-    }
+    default void onBlockDestroyed(@NotNull ItemStack stack, @NotNull Level world, @NotNull BlockState state,
+                                  @NotNull BlockPos pos, @NotNull LivingEntity entityLiving) {}
 
     /**
      * Called when an entity tries to play the 'swing' animation.
@@ -69,14 +66,13 @@ public interface IToolBehavior {
      * @param entityLiving The entity swinging the item.
      * @param stack        The Item stack
      */
-    default void onEntitySwing(@Nonnull LivingEntity entityLiving, @Nonnull ItemStack stack) {
-    }
+    default void onEntitySwing(@NotNull LivingEntity entityLiving, @NotNull ItemStack stack) {}
 
     /**
      *
-     * @param stack  the tool
-     * @param shield the shield to disable
-     * @param entity the entity holding the shield
+     * @param stack    the tool
+     * @param shield   the shield to disable
+     * @param entity   the entity holding the shield
      * @param attacker the entity attacking the shield
      * @return if the tool can disable shields
      */
@@ -87,7 +83,7 @@ public interface IToolBehavior {
     /**
      * Called when a Block is right-clicked with this Item, but before the block is activated
      *
-     * @param stack the stack used
+     * @param stack   the stack used
      * @param context the context containing all information about the click.
      */
     default InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
@@ -99,7 +95,7 @@ public interface IToolBehavior {
      *
      * @param context The UseOnContext used to determine actions.
      */
-    @Nonnull
+    @NotNull
     default InteractionResult onItemUse(UseOnContext context) {
         return InteractionResult.PASS;
     }
@@ -111,20 +107,31 @@ public interface IToolBehavior {
      * @param player the player clicking the item
      * @param hand   the hand holding the item
      */
-    @Nonnull
-    default InteractionResultHolder<ItemStack> onItemRightClick(@Nonnull Level world, @Nonnull Player player, @Nonnull InteractionHand hand) {
+    @NotNull
+    default InteractionResultHolder<ItemStack> onItemRightClick(@NotNull Level world, @NotNull Player player,
+                                                                @NotNull InteractionHand hand) {
         return InteractionResultHolder.pass(player.getItemInHand(hand));
     }
 
-    @OnlyIn(Dist.CLIENT)
-    default void addInformation(@Nonnull ItemStack stack, @Nullable Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
+    /**
+     * Called when a block is right-clicked with this Item
+     *
+     * @param context The UseOnContext used to determine the result.
+     * @return True if the UI of the MetaMachine should open after using this tool.
+     */
+    default boolean shouldOpenUIAfterUse(UseOnContext context) {
+        return true;
     }
+
+    @OnlyIn(Dist.CLIENT)
+    default void addInformation(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip,
+                                @NotNull TooltipFlag flag) {}
 
     /**
      * Add the necessary NBT information to the tool
+     * 
      * @param stack the tool
      * @param tag   the nbt tag to add to
      */
-    default void addBehaviorNBT(@Nonnull ItemStack stack, @Nonnull CompoundTag tag) {
-    }
+    default void addBehaviorNBT(@NotNull ItemStack stack, @NotNull CompoundTag tag) {}
 }

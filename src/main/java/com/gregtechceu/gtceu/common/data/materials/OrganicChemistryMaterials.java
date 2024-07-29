@@ -2,11 +2,12 @@ package com.gregtechceu.gtceu.common.data.materials;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
+import com.gregtechceu.gtceu.api.data.chemical.material.properties.HazardProperty;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.ToolProperty;
 import com.gregtechceu.gtceu.api.fluids.FluidBuilder;
 import com.gregtechceu.gtceu.api.fluids.attribute.FluidAttributes;
-import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys;
 import com.gregtechceu.gtceu.api.item.tool.GTToolType;
+import com.gregtechceu.gtceu.common.data.GTMedicalConditions;
 
 import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialFlags.*;
 import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialIconSet.FINE;
@@ -14,6 +15,7 @@ import static com.gregtechceu.gtceu.api.data.chemical.material.info.MaterialIcon
 import static com.gregtechceu.gtceu.common.data.GTMaterials.*;
 
 public class OrganicChemistryMaterials {
+
     /**
      * ID RANGE: 1000-1068 (incl.)
      */
@@ -21,6 +23,8 @@ public class OrganicChemistryMaterials {
         SiliconeRubber = new Material.Builder(GTCEu.id("silicone_rubber"))
                 .polymer()
                 .liquid(new FluidBuilder().temperature(900))
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 512, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
                 .color(0xF0F0F0).secondaryColor(0xE8E8E0)
                 .flags(GENERATE_GEAR, GENERATE_RING, GENERATE_FOIL)
                 .components(Carbon, 2, Hydrogen, 6, Oxygen, 1, Silicon, 1)
@@ -31,6 +35,7 @@ public class OrganicChemistryMaterials {
                 .color(0x704936)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 6, Hydrogen, 5, Nitrogen, 1, Oxygen, 2)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         RawRubber = new Material.Builder(GTCEu.id("raw_rubber"))
@@ -50,6 +55,8 @@ public class OrganicChemistryMaterials {
         StyreneButadieneRubber = new Material.Builder(GTCEu.id("styrene_butadiene_rubber"))
                 .polymer()
                 .liquid(new FluidBuilder().temperature(1000))
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 512, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
                 .color(0x34312b).secondaryColor(0x110B09)
                 .flags(GENERATE_FOIL, GENERATE_RING)
                 .components(Carbon, 20, Hydrogen, 26)
@@ -75,7 +82,7 @@ public class OrganicChemistryMaterials {
                 .polymer()
                 .liquid(new FluidBuilder().temperature(373))
                 .color(0xFF9955).secondaryColor(0x6ca5bf)
-                .appendFlags(EXT_METAL, GENERATE_FOIL)
+                .appendFlags(EXT_METAL, GENERATE_FOIL, GENERATE_RING)
                 .components(Carbon, 2, Hydrogen, 3, Chlorine, 1)
                 .itemPipeProperties(512, 4)
                 .buildAndRegister();
@@ -99,7 +106,9 @@ public class OrganicChemistryMaterials {
                 .liquid(new FluidBuilder().temperature(1450))
                 .color(0x464441).secondaryColor(0x382e1b)
                 .flags(EXCLUDE_BLOCK_CRAFTING_RECIPES, GENERATE_FOIL)
-                .toolStats(ToolProperty.Builder.of(1.0F, 1.0F, 128, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 1024, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER)
+                                .build())
                 .components(Carbon, 20, Hydrogen, 12, Nitrogen, 4)
                 .fluidPipeProperties(1000, 350, true)
                 .buildAndRegister();
@@ -116,7 +125,8 @@ public class OrganicChemistryMaterials {
                 .liquid(new FluidBuilder().temperature(408))
                 .color(0xC8C8C8)
                 .flags(GENERATE_FOIL)
-                .toolStats(ToolProperty.Builder.of(1.0F, 1.0F, 128, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 256, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
                 .components(Carbon, 2, Hydrogen, 4)
                 .fluidPipeProperties(370, 60, true)
                 .buildAndRegister();
@@ -142,7 +152,8 @@ public class OrganicChemistryMaterials {
                 .liquid(new FluidBuilder().temperature(600))
                 .color(0xFFFFFF).secondaryColor(0x919187)
                 .appendFlags(STD_METAL, GENERATE_FRAME, GENERATE_FOIL)
-                .toolStats(ToolProperty.Builder.of(1.0F, 1.0F, 128, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 512, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
                 .components(Carbon, 2, Fluorine, 4)
                 .fluidPipeProperties(600, 100, true, true, false, false)
                 .buildAndRegister();
@@ -156,7 +167,7 @@ public class OrganicChemistryMaterials {
 
         Methane = new Material.Builder(GTCEu.id("methane"))
                 .gas(new FluidBuilder()
-                .translation("gtceu.fluid.gas_generic"))
+                        .translation("gtceu.fluid.gas_generic"))
                 .color(0xFF0078)
                 .components(Carbon, 1, Hydrogen, 4)
                 .buildAndRegister();
@@ -177,6 +188,7 @@ public class OrganicChemistryMaterials {
                 .fluid()
                 .color(0x892CA0)
                 .components(Carbon, 1, Hydrogen, 1, Chlorine, 3)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.POISON)
                 .buildAndRegister();
 
         Cumene = new Material.Builder(GTCEu.id("cumene"))
@@ -279,6 +291,7 @@ public class OrganicChemistryMaterials {
                 .color(0x0F2828)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 1, Nitrogen, 4, Oxygen, 8)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.WEAK_POISON)
                 .buildAndRegister();
 
         Dimethylamine = new Material.Builder(GTCEu.id("dimethylamine"))
@@ -293,6 +306,7 @@ public class OrganicChemistryMaterials {
                 .color(0x000055)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 2, Hydrogen, 8, Nitrogen, 2)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         DinitrogenTetroxide = new Material.Builder(GTCEu.id("dinitrogen_tetroxide"))
@@ -341,6 +355,7 @@ public class OrganicChemistryMaterials {
                 .color(0x784421)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 6, Hydrogen, 6, Oxygen, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         BisphenolA = new Material.Builder(GTCEu.id("bisphenol_a"))
@@ -355,6 +370,7 @@ public class OrganicChemistryMaterials {
                 .color(0xE1F0F0)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 2, Hydrogen, 3, Chlorine, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         Ethylene = new Material.Builder(GTCEu.id("ethylene"))
@@ -369,6 +385,7 @@ public class OrganicChemistryMaterials {
                 .color(0x1A1A1A)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 6, Hydrogen, 6)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         Acetone = new Material.Builder(GTCEu.id("acetone"))
@@ -388,12 +405,14 @@ public class OrganicChemistryMaterials {
                 .fluid()
                 .color(0xAA8800)
                 .components(Carbon, 1, Hydrogen, 4, Oxygen, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.METHANOL_POISONING)
                 .buildAndRegister();
 
         Ethanol = new Material.Builder(GTCEu.id("ethanol"))
                 .liquid(new FluidBuilder().customStill())
-                .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 2, Hydrogen, 6, Oxygen, 1)
+                .flags(DISABLE_DECOMPOSITION)
+                // TODO ethanol intoxication .hazard(HazardProperty.HazardTrigger.INHALATION,
                 .buildAndRegister();
 
         Toluene = new Material.Builder(GTCEu.id("toluene"))
@@ -453,6 +472,7 @@ public class OrganicChemistryMaterials {
                 .color(0x326A3E)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 6, Hydrogen, 5, Chlorine, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         Octane = new Material.Builder(GTCEu.id("octane"))
@@ -473,6 +493,7 @@ public class OrganicChemistryMaterials {
                 .fluid()
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 8, Hydrogen, 10)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister();
 
         Naphthalene = new Material.Builder(GTCEu.id("naphthalene"))
@@ -486,7 +507,8 @@ public class OrganicChemistryMaterials {
                 .polymer(0)
                 .liquid(new FluidBuilder().temperature(400))
                 .color(0x353529).secondaryColor(0x080808)
-                .toolStats(ToolProperty.Builder.of(1.0F, 1.0F, 128, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
+                .toolStats(
+                        ToolProperty.Builder.of(1.0F, 1.0F, 256, 1, GTToolType.SOFT_MALLET, GTToolType.PLUNGER).build())
                 .flags(GENERATE_GEAR, GENERATE_RING, GENERATE_FOIL, GENERATE_BOLT_SCREW)
                 .components(Carbon, 5, Hydrogen, 8)
                 .buildAndRegister();
@@ -525,6 +547,7 @@ public class OrganicChemistryMaterials {
                 .color(0x554A3F)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 4, Hydrogen, 8, Oxygen, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.NAUSEA, false)
                 .buildAndRegister();
 
         PolyvinylButyral = new Material.Builder(GTCEu.id("polyvinyl_butyral"))
@@ -547,7 +570,45 @@ public class OrganicChemistryMaterials {
                 .color(0xCACC0E)
                 .flags(DISABLE_DECOMPOSITION)
                 .components(Carbon, 12, Hydrogen, 8, Chlorine, 2)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CARCINOGEN)
                 .buildAndRegister()
                 .setFormula("(C6H4Cl)2", true);
+
+        AceticAnhydride = new Material.Builder(GTCEu.id("acetic_anhydride"))
+                .fluid()
+                .color(0xE0D182)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Carbon, 4, Hydrogen, 6, Oxygen, 3)
+                .buildAndRegister()
+                .setFormula("(CH3CO)2O", true);
+
+        AminoPhenol = new Material.Builder(GTCEu.id("aminophenol"))
+                .fluid()
+                .color(0x784421)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Carbon, 6, Hydrogen, 7, Nitrogen, 1, Oxygen, 1)
+                .buildAndRegister()
+                .setFormula("H2NC6H4OH", true);
+
+        Paracetamol = new Material.Builder(GTCEu.id("paracetamol"))
+                .dust()
+                .color(0xF2EDCB)
+                .flags(DISABLE_DECOMPOSITION)
+                .components(Carbon, 8, Hydrogen, 9, Nitrogen, 1, Oxygen, 2)
+                .buildAndRegister();
+
+        AmmoniumFormate = new Material.Builder(GTCEu.id("ammonium_formate"))
+                .gas()
+                .color(0x93badb)
+                .components(Carbon, 1, Hydrogen, 5, Nitrogen, 1, Oxygen, 2)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.IRRITANT)
+                .buildAndRegister();
+
+        Formamide = new Material.Builder(GTCEu.id("formamide"))
+                .liquid()
+                .color(0x5cccb6)
+                .components(Carbon, 1, Hydrogen, 3, Nitrogen, 1, Oxygen, 1)
+                .hazard(HazardProperty.HazardTrigger.INHALATION, GTMedicalConditions.CHEMICAL_BURNS)
+                .buildAndRegister();
     }
 }

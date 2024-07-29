@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.data.tag;
 
 import com.gregtechceu.gtceu.GTCEu;
+
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -27,12 +28,13 @@ public class TagUtil {
 
     public static <T> TagKey<T> createTag(Registry<T> registry, String path, boolean vanilla) {
         if (vanilla) return optionalTag(registry, new ResourceLocation("minecraft", path));
-        return optionalTag(registry, new ResourceLocation("forge", path)); // TODO change "forge" to "common" in 1.21
+        return optionalTag(registry, new ResourceLocation("forge", path));
     }
 
-    public static <T> TagKey<T> createTag(ResourceKey<? extends Registry<T>> registryKey, String path, boolean vanilla) {
+    public static <T> TagKey<T> createTag(ResourceKey<? extends Registry<T>> registryKey, String path,
+                                          boolean vanilla) {
         if (vanilla) return optionalTag(registryKey, new ResourceLocation("minecraft", path));
-        return optionalTag(registryKey, new ResourceLocation("forge", path)); // TODO change "forge" to "common" in 1.21
+        return optionalTag(registryKey, new ResourceLocation("forge", path));
     }
 
     public static <T> TagKey<T> createModTag(Registry<T> registry, String path) {
@@ -70,5 +72,4 @@ public class TagUtil {
     public static TagKey<Fluid> createFluidTag(String path) {
         return createTag(BuiltInRegistries.FLUID, path, false);
     }
-
 }

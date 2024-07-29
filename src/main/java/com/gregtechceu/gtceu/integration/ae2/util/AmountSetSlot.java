@@ -1,16 +1,17 @@
 package com.gregtechceu.gtceu.integration.ae2.util;
 
-import appeng.api.stacks.GenericStack;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
-import com.gregtechceu.gtceu.api.gui.widget.LongInputWidget;
 import com.gregtechceu.gtceu.integration.ae2.gui.widget.AEConfigWidget;
-import com.gregtechceu.gtceu.integration.ae2.util.IConfigurableSlot;
+
 import com.lowdragmc.lowdraglib.gui.widget.TextFieldWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.utils.Position;
-import lombok.Getter;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+
+import appeng.api.stacks.GenericStack;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import static com.lowdragmc.lowdraglib.gui.util.DrawerHelper.drawStringSized;
@@ -30,7 +31,7 @@ public class AmountSetSlot extends Widget {
     public AmountSetSlot(int x, int y, AEConfigWidget widget) {
         super(x, y, 80, 30);
         this.parentWidget = widget;
-        this.amountText = new TextFieldWidget(x + 3, y + 14, 60, 15, this::getAmountStr, this::setNewAmount)
+        this.amountText = new TextFieldWidget(x + 3, y + 12, 65, 13, this::getAmountStr, this::setNewAmount)
                 .setNumbersOnly(0, Integer.MAX_VALUE)
                 .setMaxStringLength(10);
     }
@@ -45,6 +46,9 @@ public class AmountSetSlot extends Widget {
             return "0";
         }
         IConfigurableSlot slot = this.parentWidget.getConfig(this.index);
+        if (slot.getConfig() != null && slot.getConfig().amount() > 1000) {
+            return "1000";
+        }
         if (slot.getConfig() != null) {
             return String.valueOf(slot.getConfig().amount());
         }
@@ -55,8 +59,7 @@ public class AmountSetSlot extends Widget {
         try {
             long newAmount = Long.parseLong(amount);
             writeClientAction(1, buf -> buf.writeVarLong(newAmount));
-        } catch (NumberFormatException ignore) {
-        }
+        } catch (NumberFormatException ignore) {}
     }
 
     @Override
@@ -84,5 +87,4 @@ public class AmountSetSlot extends Widget {
         drawStringSized(graphics, "Amount", position.x + 3, position.y + 3, 0x404040, false, 1f, false);
         GuiTextures.DISPLAY.draw(graphics, mouseX, mouseY, position.x + 3, position.y + 11, 65, 14);
     }
-
 }

@@ -3,8 +3,10 @@ package com.gregtechceu.gtceu.api.machine.multiblock;
 import com.gregtechceu.gtceu.api.block.ICoilType;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.common.block.CoilBlock;
-import lombok.Getter;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
+
+import lombok.Getter;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -18,14 +20,14 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class CoilWorkableElectricMultiblockMachine extends WorkableElectricMultiblockMachine {
 
     @Getter
-    private ICoilType coilType  = CoilBlock.CoilType.CUPRONICKEL;
+    private ICoilType coilType = CoilBlock.CoilType.CUPRONICKEL;
 
     public CoilWorkableElectricMultiblockMachine(IMachineBlockEntity holder) {
         super(holder);
     }
 
     //////////////////////////////////////
-    //***    Multiblock LifeCycle    ***//
+    // *** Multiblock LifeCycle ***//
     //////////////////////////////////////
     @Override
     public void onStructureFormed() {

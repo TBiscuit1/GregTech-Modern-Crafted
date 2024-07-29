@@ -2,10 +2,12 @@ package com.gregtechceu.gtceu.api.gui.fancy;
 
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -34,23 +36,17 @@ public interface IFancyUIProvider {
     /**
      * Attach configurators to the left subtab list.
      */
-    default void attachSideTabs(TabsWidget configuratorPanel) {
-
-    }
+    default void attachSideTabs(TabsWidget configuratorPanel) {}
 
     /**
      * Attach configurators to the left panel.
      */
-    default void attachConfigurators(ConfiguratorPanel configuratorPanel) {
-
-    }
+    default void attachConfigurators(ConfiguratorPanel configuratorPanel) {}
 
     /**
      * Attach tooltips to the right panel
      */
-    default void attachTooltips(TooltipsPanel tooltipsPanel) {
-
-    }
+    default void attachTooltips(TooltipsPanel tooltipsPanel) {}
 
     default boolean hasPlayerInventory() {
         return true;
@@ -77,4 +73,11 @@ public interface IFancyUIProvider {
     default TooltipComponent getTabTooltipComponent() {
         return null;
     }
+
+    @Nullable
+    default PageGroupingData getPageGroupingData() {
+        return null;
+    }
+
+    record PageGroupingData(@Nullable String groupKey, int groupPositionWeight) {}
 }

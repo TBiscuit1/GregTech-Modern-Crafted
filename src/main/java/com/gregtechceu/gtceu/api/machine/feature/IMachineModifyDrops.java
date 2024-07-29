@@ -10,11 +10,12 @@ import java.util.List;
  * @date 2022/9/23
  * @implNote IBlockEntityModifyDrops
  */
-public interface IMachineModifyDrops extends IMachineFeature{
+public interface IMachineModifyDrops extends IMachineFeature {
 
     /**
      * Modify or append drops.
-     * @param drops existing drops.
+     * 
+     * @param drops  existing drops.
      * @param entity who destroyed it.
      */
     void onDrops(List<ItemStack> drops, Player entity);

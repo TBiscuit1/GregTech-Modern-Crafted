@@ -1,22 +1,24 @@
 package com.gregtechceu.gtceu.api.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
-import net.minecraft.core.Registry;
+import com.gregtechceu.gtceu.common.recipe.ResearchCondition;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.common.crafting.CraftingHelper;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import dev.latvian.mods.kubejs.recipe.ingredientaction.IngredientAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -56,12 +58,17 @@ public class GTRecipeSerializer implements RecipeSerializer<GTRecipe> {
         CompoundTag data = new CompoundTag();
         if (json.has("data"))
             data = CraftingHelper.getNBT(json.get("data"));
-        Map<RecipeCapability<?>, List<Content>> inputs = capabilitiesFromJson(json.has("inputs") ? json.getAsJsonObject("inputs") : new JsonObject());
-        Map<RecipeCapability<?>, List<Content>> tickInputs = capabilitiesFromJson(json.has("tickInputs") ? json.getAsJsonObject("tickInputs") : new JsonObject());
-        Map<RecipeCapability<?>, List<Content>> outputs = capabilitiesFromJson(json.has("outputs") ? json.getAsJsonObject("outputs") : new JsonObject());
-        Map<RecipeCapability<?>, List<Content>> tickOutputs = capabilitiesFromJson(json.has("tickOutputs") ? json.getAsJsonObject("tickOutputs") : new JsonObject());
+        Map<RecipeCapability<?>, List<Content>> inputs = capabilitiesFromJson(
+                json.has("inputs") ? json.getAsJsonObject("inputs") : new JsonObject());
+        Map<RecipeCapability<?>, List<Content>> tickInputs = capabilitiesFromJson(
+                json.has("tickInputs") ? json.getAsJsonObject("tickInputs") : new JsonObject());
+        Map<RecipeCapability<?>, List<Content>> outputs = capabilitiesFromJson(
+                json.has("outputs") ? json.getAsJsonObject("outputs") : new JsonObject());
+        Map<RecipeCapability<?>, List<Content>> tickOutputs = capabilitiesFromJson(
+                json.has("tickOutputs") ? json.getAsJsonObject("tickOutputs") : new JsonObject());
         List<RecipeCondition> conditions = new ArrayList<>();
-        JsonArray conditionsJson = json.has("recipeConditions") ? json.getAsJsonArray("recipeConditions") : new JsonArray();
+        JsonArray conditionsJson = json.has("recipeConditions") ? json.getAsJsonArray("recipeConditions") :
+                new JsonArray();
         for (JsonElement jsonElement : conditionsJson) {
             if (jsonElement instanceof JsonObject jsonObject) {
                 var conditionKey = GsonHelper.getAsString(jsonObject, "type", "");
@@ -69,13 +76,19 @@ public class GTRecipeSerializer implements RecipeSerializer<GTRecipe> {
                 if (clazz != null) {
                     RecipeCondition condition = RecipeCondition.create(clazz);
                     if (condition != null) {
-                        conditions.add(condition.deserialize(GsonHelper.getAsJsonObject(jsonObject, "data", new JsonObject())));
+                        conditions.add(condition
+                                .deserialize(GsonHelper.getAsJsonObject(jsonObject, "data", new JsonObject())));
                     }
                 }
             }
         }
+        List<?> ingredientActions = new ArrayList<>();
+        if (GTCEu.isKubeJSLoaded()) {
+            ingredientActions = KJSCallWrapper.getIngredientActions(json);
+        }
         boolean isFuel = GsonHelper.getAsBoolean(json, "isFuel", false);
-        return new GTRecipe((GTRecipeType) BuiltInRegistries.RECIPE_TYPE.get(new ResourceLocation(recipeType)), id, inputs, outputs, tickInputs, tickOutputs, conditions, data, duration, isFuel);
+        return new GTRecipe((GTRecipeType) BuiltInRegistries.RECIPE_TYPE.get(new ResourceLocation(recipeType)), id,
+                inputs, outputs, tickInputs, tickOutputs, conditions, ingredientActions, data, duration, isFuel);
     }
 
     public static Tuple<RecipeCapability<?>, List<Content>> entryReader(FriendlyByteBuf buf) {
@@ -110,29 +123,72 @@ public class GTRecipeSerializer implements RecipeSerializer<GTRecipe> {
     @Override
     @NotNull
     public GTRecipe fromNetwork(@NotNull ResourceLocation id, @NotNull FriendlyByteBuf buf) {
-        String recipeType = buf.readUtf();
+        ResourceLocation recipeType = buf.readResourceLocation();
         int duration = buf.readVarInt();
-        Map<RecipeCapability<?>, List<Content>> inputs = tuplesToMap(buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
-        Map<RecipeCapability<?>, List<Content>> tickInputs = tuplesToMap(buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
-        Map<RecipeCapability<?>, List<Content>> outputs = tuplesToMap(buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
-        Map<RecipeCapability<?>, List<Content>> tickOutputs = tuplesToMap(buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
-        List<RecipeCondition> conditions = buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::conditionReader);
+        Map<RecipeCapability<?>, List<Content>> inputs = tuplesToMap(
+                buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
+        Map<RecipeCapability<?>, List<Content>> tickInputs = tuplesToMap(
+                buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
+        Map<RecipeCapability<?>, List<Content>> outputs = tuplesToMap(
+                buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
+        Map<RecipeCapability<?>, List<Content>> tickOutputs = tuplesToMap(
+                buf.readCollection(c -> new ArrayList<>(), GTRecipeSerializer::entryReader));
+        List<RecipeCondition> conditions = buf.readCollection(c -> new ArrayList<>(),
+                GTRecipeSerializer::conditionReader);
+        List<?> ingredientActions = new ArrayList<>();
+        if (GTCEu.isKubeJSLoaded()) {
+            ingredientActions = KJSCallWrapper.getIngredientActions(buf);
+        }
         CompoundTag data = buf.readNbt();
+        if (data == null) {
+            data = new CompoundTag();
+        }
         boolean isFuel = buf.readBoolean();
-        return new GTRecipe((GTRecipeType) BuiltInRegistries.RECIPE_TYPE.get(new ResourceLocation(recipeType)), id, inputs, outputs, tickInputs, tickOutputs, conditions, data, duration, isFuel);
+        GTRecipeType type = (GTRecipeType) BuiltInRegistries.RECIPE_TYPE.get(recipeType);
+        GTRecipe recipe = new GTRecipe(type, id, inputs, outputs, tickInputs, tickOutputs, conditions,
+                ingredientActions, data, duration, isFuel);
+
+        // a little special piece of code for loading all the research entries into the recipe type's list on the
+        // client.
+        ResearchCondition researchCondition = conditions.stream().filter(ResearchCondition.class::isInstance).findAny()
+                .map(ResearchCondition.class::cast).orElse(null);
+        if (researchCondition != null) {
+            for (ResearchData.ResearchEntry entry : researchCondition.data) {
+                type.addDataStickEntry(entry.getResearchId(), recipe);
+            }
+        }
+        return recipe;
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf buf, GTRecipe recipe) {
-        buf.writeUtf(recipe.recipeType == null ? "dummy" : recipe.recipeType.toString());
+        buf.writeResourceLocation(recipe.recipeType.registryName);
         buf.writeVarInt(recipe.duration);
         buf.writeCollection(recipe.inputs.entrySet(), GTRecipeSerializer::entryWriter);
         buf.writeCollection(recipe.tickInputs.entrySet(), GTRecipeSerializer::entryWriter);
         buf.writeCollection(recipe.outputs.entrySet(), GTRecipeSerializer::entryWriter);
         buf.writeCollection(recipe.tickOutputs.entrySet(), GTRecipeSerializer::entryWriter);
         buf.writeCollection(recipe.conditions, GTRecipeSerializer::conditionWriter);
+        if (GTCEu.isKubeJSLoaded()) {
+            KJSCallWrapper.writeIngredientActions(recipe.ingredientActions, buf);
+        }
         buf.writeNbt(recipe.data);
         buf.writeBoolean(recipe.isFuel);
     }
 
+    public static class KJSCallWrapper {
+
+        public static List<?> getIngredientActions(JsonObject json) {
+            return IngredientAction.parseList(json.get("kubejs:actions"));
+        }
+
+        public static List<?> getIngredientActions(FriendlyByteBuf buf) {
+            return IngredientAction.readList(buf);
+        }
+
+        public static void writeIngredientActions(List<?> ingredientActions, FriendlyByteBuf buf) {
+            // noinspection unchecked must be List<?> to be able to load without KJS.
+            IngredientAction.writeList(buf, (List<IngredientAction>) ingredientActions);
+        }
+    }
 }

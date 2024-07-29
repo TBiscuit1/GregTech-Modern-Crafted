@@ -1,16 +1,18 @@
 package com.gregtechceu.gtceu.api.recipe;
 
-import com.google.gson.JsonObject;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
+
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author KilaBash
@@ -43,7 +45,8 @@ public abstract class RecipeCondition {
     }
 
     public IGuiTexture getValidTexture() {
-        return new ResourceTexture("gtceu:textures/gui/condition/" + getType() + ".png").getSubTexture(0, 0.5f, 1, 0.5f);
+        return new ResourceTexture("gtceu:textures/gui/condition/" + getType() + ".png").getSubTexture(0, 0.5f, 1,
+                0.5f);
     }
 
     public boolean isReverse() {
@@ -61,11 +64,11 @@ public abstract class RecipeCondition {
 
     public abstract Component getTooltips();
 
-    public abstract boolean test(@Nonnull GTRecipe recipe, @Nonnull RecipeLogic recipeLogic);
+    public abstract boolean test(@NotNull GTRecipe recipe, @NotNull RecipeLogic recipeLogic);
 
     public abstract RecipeCondition createTemplate();
 
-    @Nonnull
+    @NotNull
     public JsonObject serialize() {
         JsonObject jsonObject = new JsonObject();
         if (isReverse) {
@@ -74,7 +77,7 @@ public abstract class RecipeCondition {
         return jsonObject;
     }
 
-    public RecipeCondition deserialize(@Nonnull JsonObject config) {
+    public RecipeCondition deserialize(@NotNull JsonObject config) {
         isReverse = GsonHelper.getAsBoolean(config, "reverse", false);
         return this;
     }
@@ -87,5 +90,4 @@ public abstract class RecipeCondition {
         isReverse = buf.readBoolean();
         return this;
     }
-
 }

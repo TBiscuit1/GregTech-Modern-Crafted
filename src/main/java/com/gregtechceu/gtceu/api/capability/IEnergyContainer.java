@@ -1,6 +1,5 @@
 package com.gregtechceu.gtceu.api.capability;
 
-
 import net.minecraft.core.Direction;
 
 import java.math.BigInteger;
@@ -76,7 +75,6 @@ public interface IEnergyContainer extends IEnergyInfoProvider {
      */
     long getEnergyCapacity();
 
-
     @Override
     default EnergyInfo getEnergyInfo() {
         return new EnergyInfo(BigInteger.valueOf(getEnergyCapacity()), BigInteger.valueOf(getEnergyStored()));
@@ -108,29 +106,34 @@ public interface IEnergyContainer extends IEnergyInfoProvider {
 
     /**
      * @return output energy packet size
-     * Overflowing this value will explode machine.
+     *         Overflowing this value will explode machine.
      */
     long getInputVoltage();
 
-//    /**
-//     * @return input eu/s
-//     */
-//    default long getInputPerSec() {return 0L;}
-//
-//    /**
-//     * @return output eu/s
-//     */
-//    default long getOutputPerSec() {return 0L;}
+    /**
+     * @return input eu/s
+     */
+    default long getInputPerSec() {
+        return 0L;
+    }
+
+    /**
+     * @return output eu/s
+     */
+    default long getOutputPerSec() {
+        return 0L;
+    }
 
     /**
      * @return true if information like energy capacity should be hidden from TOP.
-     * Useful for cables
+     *         Useful for cables
      */
     default boolean isOneProbeHidden() {
         return false;
     }
 
     IEnergyContainer DEFAULT = new IEnergyContainer() {
+
         @Override
         public long acceptEnergyFromNetwork(Direction Direction, long l, long l1) {
             return 0;

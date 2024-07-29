@@ -4,10 +4,11 @@ import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.stack.UnificationEntry;
 import com.gregtechceu.gtceu.data.recipe.CustomTags;
 import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,14 +23,32 @@ import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLY_LINE_RECI
 public class ComponentRecipes {
 
     public static void init(Consumer<FinishedRecipe> provider) {
-
-        //Motors Start--------------------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, "electric_motor_lv_steel", ELECTRIC_MOTOR_LV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Tin), 'W', new UnificationEntry(wireGtSingle, Copper), 'R', new UnificationEntry(rod, Steel), 'M', new UnificationEntry(rod, SteelMagnetic));
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_lv_iron", ELECTRIC_MOTOR_LV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Tin), 'W', new UnificationEntry(wireGtSingle, Copper), 'R', new UnificationEntry(rod, Iron), 'M', new UnificationEntry(rod, IronMagnetic));
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_mv", ELECTRIC_MOTOR_MV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Copper), 'W', new UnificationEntry(wireGtDouble, Cupronickel), 'R', new UnificationEntry(rod, Aluminium), 'M', new UnificationEntry(rod, SteelMagnetic));
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_hv", ELECTRIC_MOTOR_HV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Silver), 'W', new UnificationEntry(wireGtDouble, Electrum), 'R', new UnificationEntry(rod, StainlessSteel), 'M', new UnificationEntry(rod, SteelMagnetic));
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_ev", ELECTRIC_MOTOR_EV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Aluminium), 'W', new UnificationEntry(wireGtDouble, Kanthal), 'R', new UnificationEntry(rod, Titanium), 'M', new UnificationEntry(rod, NeodymiumMagnetic));
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_iv", ELECTRIC_MOTOR_IV.asStack(), "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Tungsten), 'W', new UnificationEntry(wireGtDouble, Graphene), 'R', new UnificationEntry(rod, TungstenSteel), 'M', new UnificationEntry(rod, NeodymiumMagnetic));
+        // Motors
+        // Start--------------------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, "electric_motor_lv_steel", ELECTRIC_MOTOR_LV.asStack(), "CWR",
+                "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Tin), 'W',
+                new UnificationEntry(wireGtSingle, Copper), 'R', new UnificationEntry(rod, Steel), 'M',
+                new UnificationEntry(rod, SteelMagnetic));
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_lv_iron", ELECTRIC_MOTOR_LV.asStack(),
+                "CWR", "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Tin), 'W',
+                new UnificationEntry(wireGtSingle, Copper), 'R', new UnificationEntry(rod, Iron), 'M',
+                new UnificationEntry(rod, IronMagnetic));
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_mv", ELECTRIC_MOTOR_MV.asStack(), "CWR",
+                "WMW", "RWC", 'C', new UnificationEntry(cableGtSingle, Copper), 'W',
+                new UnificationEntry(wireGtDouble, Cupronickel), 'R', new UnificationEntry(rod, Aluminium), 'M',
+                new UnificationEntry(rod, SteelMagnetic));
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_hv", ELECTRIC_MOTOR_HV.asStack(), "CWR",
+                "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Silver), 'W',
+                new UnificationEntry(wireGtDouble, Electrum), 'R', new UnificationEntry(rod, StainlessSteel), 'M',
+                new UnificationEntry(rod, SteelMagnetic));
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_ev", ELECTRIC_MOTOR_EV.asStack(), "CWR",
+                "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Aluminium), 'W',
+                new UnificationEntry(wireGtDouble, Kanthal), 'R', new UnificationEntry(rod, Titanium), 'M',
+                new UnificationEntry(rod, NeodymiumMagnetic));
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_motor_iv", ELECTRIC_MOTOR_IV.asStack(), "CWR",
+                "WMW", "RWC", 'C', new UnificationEntry(cableGtDouble, Tungsten), 'W',
+                new UnificationEntry(wireGtDouble, Graphene), 'R', new UnificationEntry(rod, TungstenSteel), 'M',
+                new UnificationEntry(rod, NeodymiumMagnetic));
 
         ASSEMBLER_RECIPES.recipeBuilder("electric_motor_lv_iron")
                 .inputItems(cableGtSingle, Tin, 2)
@@ -102,6 +121,10 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 2))
                 .inputFluids(Lubricant.getFluid(500))
                 .outputItems(ELECTRIC_MOTOR_ZPM)
+                .scannerResearch(b -> b
+                        .researchStack(ELECTRIC_MOTOR_LuV.asStack())
+                        .duration(1200)
+                        .EUt(VA[IV]))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("electric_motor_uv")
@@ -116,11 +139,14 @@ public class ComponentRecipes {
                 .inputFluids(Lubricant.getFluid(1000))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(ELECTRIC_MOTOR_UV)
+                .stationResearch(b -> b
+                        .researchStack(ELECTRIC_MOTOR_ZPM.asStack())
+                        .CWUt(32)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-
-
-        //Conveyors Start-----------------------------------------------------------------------------------------------
+        // Conveyors
+        // Start-----------------------------------------------------------------------------------------------
         final Map<String, Material> rubberMaterials = new Object2ObjectOpenHashMap<>();
         rubberMaterials.put("rubber", Rubber);
         rubberMaterials.put("silicone_rubber", SiliconeRubber);
@@ -130,12 +156,27 @@ public class ComponentRecipes {
             Material material = materialEntry.getValue();
             String name = materialEntry.getKey();
 
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("conveyor_module_lv_%s", name), CONVEYOR_MODULE_LV.asStack(), "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Tin), 'M', ELECTRIC_MOTOR_LV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("conveyor_module_mv_%s", name), CONVEYOR_MODULE_MV.asStack(), "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Copper), 'M', ELECTRIC_MOTOR_MV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("conveyor_module_hv_%s", name), CONVEYOR_MODULE_HV.asStack(), "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Gold), 'M', ELECTRIC_MOTOR_HV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("conveyor_module_ev_%s", name), CONVEYOR_MODULE_EV.asStack(), "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Aluminium), 'M', ELECTRIC_MOTOR_EV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("conveyor_module_lv_%s", name), CONVEYOR_MODULE_LV.asStack(), "RRR", "MCM", "RRR",
+                    'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Tin), 'M',
+                    ELECTRIC_MOTOR_LV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("conveyor_module_mv_%s", name), CONVEYOR_MODULE_MV.asStack(), "RRR", "MCM", "RRR",
+                    'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Copper), 'M',
+                    ELECTRIC_MOTOR_MV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("conveyor_module_hv_%s", name), CONVEYOR_MODULE_HV.asStack(), "RRR", "MCM", "RRR",
+                    'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Gold), 'M',
+                    ELECTRIC_MOTOR_HV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("conveyor_module_ev_%s", name), CONVEYOR_MODULE_EV.asStack(), "RRR", "MCM", "RRR",
+                    'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Aluminium),
+                    'M', ELECTRIC_MOTOR_EV.asStack());
             if (!materialEntry.getValue().equals(Rubber))
-                VanillaRecipeHelper.addShapedRecipe(provider, material.equals(SiliconeRubber), String.format("conveyor_module_iv_%s", materialEntry.getKey()), CONVEYOR_MODULE_IV.asStack(), "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C', new UnificationEntry(cableGtSingle, Tungsten), 'M', ELECTRIC_MOTOR_IV.asStack());
+                VanillaRecipeHelper.addShapedRecipe(provider, material.equals(SiliconeRubber),
+                        String.format("conveyor_module_iv_%s", materialEntry.getKey()), CONVEYOR_MODULE_IV.asStack(),
+                        "RRR", "MCM", "RRR", 'R', new UnificationEntry(plate, material), 'C',
+                        new UnificationEntry(cableGtSingle, Tungsten), 'M', ELECTRIC_MOTOR_IV.asStack());
 
             ASSEMBLER_RECIPES.recipeBuilder("conveyor_module_lv_" + name)
                     .inputItems(cableGtSingle, Tin)
@@ -178,14 +219,35 @@ public class ComponentRecipes {
                         .outputItems(CONVEYOR_MODULE_IV)
                         .duration(100).EUt(VA[LV]).save(provider);
 
-
-            //Pumps Start---------------------------------------------------------------------------------------------------
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("electric_pump_lv_%s", name), ELECTRIC_PUMP_LV.asStack(), "SXR", "dPw", "RMC", 'S', new UnificationEntry(screw, Tin), 'X', new UnificationEntry(rotor, Tin), 'P', new UnificationEntry(pipeNormalFluid, Bronze), 'R', new UnificationEntry(ring, material), 'C', new UnificationEntry(cableGtSingle, Tin), 'M', ELECTRIC_MOTOR_LV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("electric_pump_mv_%s", name), ELECTRIC_PUMP_MV.asStack(), "SXR", "dPw", "RMC", 'S', new UnificationEntry(screw, Bronze), 'X', new UnificationEntry(rotor, Bronze), 'P', new UnificationEntry(pipeNormalFluid, Steel), 'R', new UnificationEntry(ring, material), 'C', new UnificationEntry(cableGtSingle, Copper), 'M', ELECTRIC_MOTOR_MV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("electric_pump_hv_%s", name), ELECTRIC_PUMP_HV.asStack(), "SXR", "dPw", "RMC", 'S', new UnificationEntry(screw, Steel), 'X', new UnificationEntry(rotor, Steel), 'P', new UnificationEntry(pipeNormalFluid, StainlessSteel), 'R', new UnificationEntry(ring, material), 'C', new UnificationEntry(cableGtSingle, Gold), 'M', ELECTRIC_MOTOR_HV.asStack());
-            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber), String.format("electric_pump_ev_%s", name), ELECTRIC_PUMP_EV.asStack(), "SXR", "dPw", "RMC", 'S', new UnificationEntry(screw, StainlessSteel), 'X', new UnificationEntry(rotor, StainlessSteel), 'P', new UnificationEntry(pipeNormalFluid, Titanium), 'R', new UnificationEntry(ring, material), 'C', new UnificationEntry(cableGtSingle, Aluminium), 'M', ELECTRIC_MOTOR_EV.asStack());
+            // Pumps
+            // Start---------------------------------------------------------------------------------------------------
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("electric_pump_lv_%s", name), ELECTRIC_PUMP_LV.asStack(), "SXR", "dPw", "RMC", 'S',
+                    new UnificationEntry(screw, Tin), 'X', new UnificationEntry(rotor, Tin), 'P',
+                    new UnificationEntry(pipeNormalFluid, Bronze), 'R', new UnificationEntry(ring, material), 'C',
+                    new UnificationEntry(cableGtSingle, Tin), 'M', ELECTRIC_MOTOR_LV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("electric_pump_mv_%s", name), ELECTRIC_PUMP_MV.asStack(), "SXR", "dPw", "RMC", 'S',
+                    new UnificationEntry(screw, Bronze), 'X', new UnificationEntry(rotor, Bronze), 'P',
+                    new UnificationEntry(pipeNormalFluid, Steel), 'R', new UnificationEntry(ring, material), 'C',
+                    new UnificationEntry(cableGtSingle, Copper), 'M', ELECTRIC_MOTOR_MV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("electric_pump_hv_%s", name), ELECTRIC_PUMP_HV.asStack(), "SXR", "dPw", "RMC", 'S',
+                    new UnificationEntry(screw, Steel), 'X', new UnificationEntry(rotor, Steel), 'P',
+                    new UnificationEntry(pipeNormalFluid, StainlessSteel), 'R', new UnificationEntry(ring, material),
+                    'C', new UnificationEntry(cableGtSingle, Gold), 'M', ELECTRIC_MOTOR_HV.asStack());
+            VanillaRecipeHelper.addShapedRecipe(provider, material.equals(Rubber),
+                    String.format("electric_pump_ev_%s", name), ELECTRIC_PUMP_EV.asStack(), "SXR", "dPw", "RMC", 'S',
+                    new UnificationEntry(screw, StainlessSteel), 'X', new UnificationEntry(rotor, StainlessSteel), 'P',
+                    new UnificationEntry(pipeNormalFluid, Titanium), 'R', new UnificationEntry(ring, material), 'C',
+                    new UnificationEntry(cableGtSingle, Aluminium), 'M', ELECTRIC_MOTOR_EV.asStack());
             if (!material.equals(Rubber))
-                VanillaRecipeHelper.addShapedRecipe(provider, material.equals(SiliconeRubber), String.format("electric_pump_iv_%s", name), ELECTRIC_PUMP_IV.asStack(), "SXR", "dPw", "RMC", 'S', new UnificationEntry(screw, TungstenSteel), 'X', new UnificationEntry(rotor, TungstenSteel), 'P', new UnificationEntry(pipeNormalFluid, TungstenSteel), 'R', new UnificationEntry(ring, material), 'C', new UnificationEntry(cableGtSingle, Tungsten), 'M', ELECTRIC_MOTOR_IV.asStack());
+                VanillaRecipeHelper.addShapedRecipe(provider, material.equals(SiliconeRubber),
+                        String.format("electric_pump_iv_%s", name), ELECTRIC_PUMP_IV.asStack(), "SXR", "dPw", "RMC",
+                        'S', new UnificationEntry(screw, TungstenSteel), 'X',
+                        new UnificationEntry(rotor, TungstenSteel), 'P',
+                        new UnificationEntry(pipeNormalFluid, TungstenSteel), 'R', new UnificationEntry(ring, material),
+                        'C', new UnificationEntry(cableGtSingle, Tungsten), 'M', ELECTRIC_MOTOR_IV.asStack());
 
             ASSEMBLER_RECIPES.recipeBuilder("electric_pump_lv_" + name)
                     .inputItems(cableGtSingle, Tin)
@@ -263,6 +325,10 @@ public class ComponentRecipes {
                 .inputFluids(Lubricant.getFluid(500))
                 .inputFluids(StyreneButadieneRubber.getFluid(L * 16))
                 .outputItems(CONVEYOR_MODULE_ZPM)
+                .scannerResearch(b -> b
+                        .researchStack(CONVEYOR_MODULE_LuV.asStack())
+                        .duration(1200)
+                        .EUt(VA[IV]))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("conveyor_module_uv")
@@ -277,6 +343,10 @@ public class ComponentRecipes {
                 .inputFluids(StyreneButadieneRubber.getFluid(L * 24))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(CONVEYOR_MODULE_UV)
+                .stationResearch(b -> b
+                        .researchStack(CONVEYOR_MODULE_ZPM.asStack())
+                        .CWUt(32)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("electric_pump_luv")
@@ -303,6 +373,10 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 2))
                 .inputFluids(Lubricant.getFluid(500))
                 .outputItems(ELECTRIC_PUMP_ZPM)
+                .scannerResearch(b -> b
+                        .researchStack(ELECTRIC_PUMP_LuV.asStack())
+                        .duration(1200)
+                        .EUt(VA[IV]))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("electric_pump_uv")
@@ -317,9 +391,14 @@ public class ComponentRecipes {
                 .inputFluids(Lubricant.getFluid(1000))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(ELECTRIC_PUMP_UV)
+                .stationResearch(b -> b
+                        .researchStack(ELECTRIC_PUMP_ZPM.asStack())
+                        .CWUt(32)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-        //Fluid Regulators----------------------------------------------------------------------------------------------
+        // Fluid
+        // Regulators----------------------------------------------------------------------------------------------
 
         ASSEMBLER_RECIPES.recipeBuilder("fluid_regulator_lv")
                 .inputItems(ELECTRIC_PUMP_LV)
@@ -393,9 +472,11 @@ public class ComponentRecipes {
                 .duration(50)
                 .save(provider);
 
-        //Voiding Covers Start-----------------------------------------------------------------------------------------
+        // Voiding Covers Start-----------------------------------------------------------------------------------------
 
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "cover_item_voiding", COVER_ITEM_VOIDING.asStack(), "SDS", "dPw", " E ", 'S', new UnificationEntry(screw, Steel), 'D', COVER_ITEM_DETECTOR.asStack(), 'P', new UnificationEntry(pipeNormalItem, Brass), 'E', Items.ENDER_PEARL);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "cover_item_voiding", COVER_ITEM_VOIDING.asStack(), "SDS",
+                "dPw", " E ", 'S', new UnificationEntry(screw, Steel), 'D', COVER_ITEM_DETECTOR.asStack(), 'P',
+                new UnificationEntry(pipeNormalItem, Brass), 'E', Items.ENDER_PEARL);
 
         ASSEMBLER_RECIPES.recipeBuilder("cover_item_voiding")
                 .inputItems(screw, Steel, 2)
@@ -411,7 +492,9 @@ public class ComponentRecipes {
                 .outputItems(COVER_ITEM_VOIDING_ADVANCED)
                 .duration(100).EUt(VA[LV]).save(provider);
 
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "cover_fluid_voiding", COVER_FLUID_VOIDING.asStack(), "SDS", "dPw", " E ", 'S', new UnificationEntry(screw, Steel), 'D', COVER_FLUID_DETECTOR.asStack(), 'P', new UnificationEntry(pipeNormalFluid, Bronze), 'E', Items.ENDER_PEARL);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "cover_fluid_voiding", COVER_FLUID_VOIDING.asStack(), "SDS",
+                "dPw", " E ", 'S', new UnificationEntry(screw, Steel), 'D', COVER_FLUID_DETECTOR.asStack(), 'P',
+                new UnificationEntry(pipeNormalFluid, Bronze), 'E', Items.ENDER_PEARL);
 
         ASSEMBLER_RECIPES.recipeBuilder("cover_fluid_voiding")
                 .inputItems(screw, Steel, 2)
@@ -427,12 +510,28 @@ public class ComponentRecipes {
                 .outputItems(COVER_FLUID_VOIDING_ADVANCED)
                 .duration(100).EUt(VA[LV]).save(provider);
 
-        //Pistons Start-------------------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_lv", ELECTRIC_PISTON_LV.asStack(), "PPP", "CRR", "CMG", 'P', new UnificationEntry(plate, Steel), 'C', new UnificationEntry(cableGtSingle, Tin), 'R', new UnificationEntry(rod, Steel), 'G', new UnificationEntry(gearSmall, Steel), 'M', ELECTRIC_MOTOR_LV.asStack());
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_mv", ELECTRIC_PISTON_MV.asStack(), "PPP", "CRR", "CMG", 'P', new UnificationEntry(plate, Aluminium), 'C', new UnificationEntry(cableGtSingle, Copper), 'R', new UnificationEntry(rod, Aluminium), 'G', new UnificationEntry(gearSmall, Aluminium), 'M', ELECTRIC_MOTOR_MV.asStack());
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_hv", ELECTRIC_PISTON_HV.asStack(), "PPP", "CRR", "CMG", 'P', new UnificationEntry(plate, StainlessSteel), 'C', new UnificationEntry(cableGtSingle, Gold), 'R', new UnificationEntry(rod, StainlessSteel), 'G', new UnificationEntry(gearSmall, StainlessSteel), 'M', ELECTRIC_MOTOR_HV.asStack());
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_ev", ELECTRIC_PISTON_EV.asStack(), "PPP", "CRR", "CMG", 'P', new UnificationEntry(plate, Titanium), 'C', new UnificationEntry(cableGtSingle, Aluminium), 'R', new UnificationEntry(rod, Titanium), 'G', new UnificationEntry(gearSmall, Titanium), 'M', ELECTRIC_MOTOR_EV.asStack());
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_iv", ELECTRIC_PISTON_IV.asStack(), "PPP", "CRR", "CMG", 'P', new UnificationEntry(plate, TungstenSteel), 'C', new UnificationEntry(cableGtSingle, Tungsten), 'R', new UnificationEntry(rod, TungstenSteel), 'G', new UnificationEntry(gearSmall, TungstenSteel), 'M', ELECTRIC_MOTOR_IV.asStack());
+        // Pistons
+        // Start-------------------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_lv", ELECTRIC_PISTON_LV.asStack(), "PPP",
+                "CRR", "CMG", 'P', new UnificationEntry(plate, Steel), 'C', new UnificationEntry(cableGtSingle, Tin),
+                'R', new UnificationEntry(rod, Steel), 'G', new UnificationEntry(gearSmall, Steel), 'M',
+                ELECTRIC_MOTOR_LV.asStack());
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_mv", ELECTRIC_PISTON_MV.asStack(), "PPP",
+                "CRR", "CMG", 'P', new UnificationEntry(plate, Aluminium), 'C',
+                new UnificationEntry(cableGtSingle, Copper), 'R', new UnificationEntry(rod, Aluminium), 'G',
+                new UnificationEntry(gearSmall, Aluminium), 'M', ELECTRIC_MOTOR_MV.asStack());
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_hv", ELECTRIC_PISTON_HV.asStack(), "PPP",
+                "CRR", "CMG", 'P', new UnificationEntry(plate, StainlessSteel), 'C',
+                new UnificationEntry(cableGtSingle, Gold), 'R', new UnificationEntry(rod, StainlessSteel), 'G',
+                new UnificationEntry(gearSmall, StainlessSteel), 'M', ELECTRIC_MOTOR_HV.asStack());
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_ev", ELECTRIC_PISTON_EV.asStack(), "PPP",
+                "CRR", "CMG", 'P', new UnificationEntry(plate, Titanium), 'C',
+                new UnificationEntry(cableGtSingle, Aluminium), 'R', new UnificationEntry(rod, Titanium), 'G',
+                new UnificationEntry(gearSmall, Titanium), 'M', ELECTRIC_MOTOR_EV.asStack());
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "electric_piston_iv", ELECTRIC_PISTON_IV.asStack(), "PPP",
+                "CRR", "CMG", 'P', new UnificationEntry(plate, TungstenSteel), 'C',
+                new UnificationEntry(cableGtSingle, Tungsten), 'R', new UnificationEntry(rod, TungstenSteel), 'G',
+                new UnificationEntry(gearSmall, TungstenSteel), 'M', ELECTRIC_MOTOR_IV.asStack());
 
         ASSEMBLER_RECIPES.recipeBuilder("electric_piston_lv")
                 .inputItems(rod, Steel, 2)
@@ -479,7 +578,6 @@ public class ComponentRecipes {
                 .outputItems(ELECTRIC_PISTON_IV)
                 .duration(100).EUt(VA[LV]).save(provider);
 
-
         ASSEMBLY_LINE_RECIPES.recipeBuilder("electric_piston_luv")
                 .inputItems(ELECTRIC_MOTOR_LuV)
                 .inputItems(plate, HSSS, 4)
@@ -506,6 +604,10 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 2))
                 .inputFluids(Lubricant.getFluid(500))
                 .outputItems(ELECTRIC_PISTON_ZPM)
+                .scannerResearch(b -> b
+                        .researchStack(ELECTRIC_PISTON_LUV.asStack())
+                        .duration(1200)
+                        .EUt(VA[IV]))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("electric_piston_uv")
@@ -521,16 +623,29 @@ public class ComponentRecipes {
                 .inputFluids(Lubricant.getFluid(1000))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(ELECTRIC_PISTON_UV)
+                .stationResearch(b -> b
+                        .researchStack(ELECTRIC_PISTON_ZPM.asStack())
+                        .CWUt(32)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-
-
-        //Robot Arms Start ---------------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_lv", ROBOT_ARM_LV.asStack(), "CCC", "MRM", "PXR", 'C', new UnificationEntry(cableGtSingle, Tin), 'R', new UnificationEntry(rod, Steel), 'M', ELECTRIC_MOTOR_LV.asStack(), 'P', ELECTRIC_PISTON_LV.asStack(), 'X', CustomTags.LV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_mv", ROBOT_ARM_MV.asStack(), "CCC", "MRM", "PXR", 'C', new UnificationEntry(cableGtSingle, Copper), 'R', new UnificationEntry(rod, Aluminium), 'M', ELECTRIC_MOTOR_MV.asStack(), 'P', ELECTRIC_PISTON_MV.asStack(), 'X', CustomTags.MV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_hv", ROBOT_ARM_HV.asStack(), "CCC", "MRM", "PXR", 'C', new UnificationEntry(cableGtSingle, Gold), 'R', new UnificationEntry(rod, StainlessSteel), 'M', ELECTRIC_MOTOR_HV.asStack(), 'P', ELECTRIC_PISTON_HV.asStack(), 'X', CustomTags.HV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_ev", ROBOT_ARM_EV.asStack(), "CCC", "MRM", "PXR", 'C', new UnificationEntry(cableGtSingle, Aluminium), 'R', new UnificationEntry(rod, Titanium), 'M', ELECTRIC_MOTOR_EV.asStack(), 'P', ELECTRIC_PISTON_EV.asStack(), 'X', CustomTags.EV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_iv", ROBOT_ARM_IV.asStack(), "CCC", "MRM", "PXR", 'C', new UnificationEntry(cableGtSingle, Tungsten), 'R', new UnificationEntry(rod, TungstenSteel), 'M', ELECTRIC_MOTOR_IV.asStack(), 'P', ELECTRIC_PISTON_IV.asStack(), 'X', CustomTags.IV_CIRCUITS);
+        // Robot Arms Start
+        // ---------------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_lv", ROBOT_ARM_LV.asStack(), "CCC", "MRM", "PXR",
+                'C', new UnificationEntry(cableGtSingle, Tin), 'R', new UnificationEntry(rod, Steel), 'M',
+                ELECTRIC_MOTOR_LV.asStack(), 'P', ELECTRIC_PISTON_LV.asStack(), 'X', CustomTags.LV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_mv", ROBOT_ARM_MV.asStack(), "CCC", "MRM", "PXR",
+                'C', new UnificationEntry(cableGtSingle, Copper), 'R', new UnificationEntry(rod, Aluminium), 'M',
+                ELECTRIC_MOTOR_MV.asStack(), 'P', ELECTRIC_PISTON_MV.asStack(), 'X', CustomTags.MV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_hv", ROBOT_ARM_HV.asStack(), "CCC", "MRM", "PXR",
+                'C', new UnificationEntry(cableGtSingle, Gold), 'R', new UnificationEntry(rod, StainlessSteel), 'M',
+                ELECTRIC_MOTOR_HV.asStack(), 'P', ELECTRIC_PISTON_HV.asStack(), 'X', CustomTags.HV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_ev", ROBOT_ARM_EV.asStack(), "CCC", "MRM", "PXR",
+                'C', new UnificationEntry(cableGtSingle, Aluminium), 'R', new UnificationEntry(rod, Titanium), 'M',
+                ELECTRIC_MOTOR_EV.asStack(), 'P', ELECTRIC_PISTON_EV.asStack(), 'X', CustomTags.EV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "robot_arm_iv", ROBOT_ARM_IV.asStack(), "CCC", "MRM", "PXR",
+                'C', new UnificationEntry(cableGtSingle, Tungsten), 'R', new UnificationEntry(rod, TungstenSteel), 'M',
+                ELECTRIC_MOTOR_IV.asStack(), 'P', ELECTRIC_PISTON_IV.asStack(), 'X', CustomTags.IV_CIRCUITS);
 
         ASSEMBLER_RECIPES.recipeBuilder("robot_arm_lv")
                 .inputItems(cableGtSingle, Tin, 3)
@@ -605,6 +720,10 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 8))
                 .inputFluids(Lubricant.getFluid(500))
                 .outputItems(ROBOT_ARM_ZPM)
+                .scannerResearch(b -> b
+                        .researchStack(ROBOT_ARM_LuV.asStack())
+                        .duration(1200)
+                        .EUt(VA[IV]))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("robot_arm_uv")
@@ -621,16 +740,33 @@ public class ComponentRecipes {
                 .inputFluids(Lubricant.getFluid(1000))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(ROBOT_ARM_UV)
+                .stationResearch(b -> b
+                        .researchStack(ROBOT_ARM_ZPM.asStack())
+                        .CWUt(32)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-
-
-        //Field Generators Start ---------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_lv", FIELD_GENERATOR_LV.asStack(), "WPW", "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, ManganesePhosphide), 'P', new UnificationEntry(plate, Steel), 'G', new UnificationEntry(gem, EnderPearl), 'X', CustomTags.LV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_mv", FIELD_GENERATOR_MV.asStack(), "WPW", "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, MagnesiumDiboride), 'P', new UnificationEntry(plate, Aluminium), 'G', new UnificationEntry(gem, EnderEye), 'X', CustomTags.MV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_hv", FIELD_GENERATOR_HV.asStack(), "WPW", "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, MercuryBariumCalciumCuprate), 'P', new UnificationEntry(plate, StainlessSteel), 'G', QUANTUM_EYE.asStack(), 'X', CustomTags.HV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_ev", FIELD_GENERATOR_EV.asStack(), "WPW", "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, UraniumTriplatinum), 'P', new UnificationEntry(plateDouble, Titanium), 'G', new UnificationEntry(gem, NetherStar), 'X', CustomTags.EV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_iv", FIELD_GENERATOR_IV.asStack(), "WPW", "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, SamariumIronArsenicOxide), 'P', new UnificationEntry(plateDouble, TungstenSteel), 'G', QUANTUM_STAR.asStack(), 'X', CustomTags.IV_CIRCUITS);
+        // Field Generators Start
+        // ---------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_lv", FIELD_GENERATOR_LV.asStack(), "WPW",
+                "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, ManganesePhosphide), 'P',
+                new UnificationEntry(plate, Steel), 'G', new UnificationEntry(gem, EnderPearl), 'X',
+                CustomTags.LV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_mv", FIELD_GENERATOR_MV.asStack(), "WPW",
+                "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, MagnesiumDiboride), 'P',
+                new UnificationEntry(plate, Aluminium), 'G', new UnificationEntry(gem, EnderEye), 'X',
+                CustomTags.MV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_hv", FIELD_GENERATOR_HV.asStack(), "WPW",
+                "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, MercuryBariumCalciumCuprate), 'P',
+                new UnificationEntry(plate, StainlessSteel), 'G', QUANTUM_EYE.asStack(), 'X', CustomTags.HV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_ev", FIELD_GENERATOR_EV.asStack(), "WPW",
+                "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, UraniumTriplatinum), 'P',
+                new UnificationEntry(plateDouble, Titanium), 'G', new UnificationEntry(gem, NetherStar), 'X',
+                CustomTags.EV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "field_generator_iv", FIELD_GENERATOR_IV.asStack(), "WPW",
+                "XGX", "WPW", 'W', new UnificationEntry(wireGtQuadruple, SamariumIronArsenicOxide), 'P',
+                new UnificationEntry(plateDouble, TungstenSteel), 'G', QUANTUM_STAR.asStack(), 'X',
+                CustomTags.IV_CIRCUITS);
 
         ASSEMBLER_RECIPES.recipeBuilder("field_generator_lv")
                 .inputItems(gem, EnderPearl)
@@ -683,6 +819,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, NiobiumTitanium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 4))
                 .outputItems(FIELD_GENERATOR_LuV)
+                .scannerResearch(b -> b
+                        .researchStack(FIELD_GENERATOR_IV.asStack())
+                        .duration(2400))
                 .duration(600).EUt(6000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("field_generator_zpm")
@@ -696,6 +835,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, VanadiumGallium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 8))
                 .outputItems(FIELD_GENERATOR_ZPM)
+                .stationResearch(b -> b
+                        .researchStack(FIELD_GENERATOR_LuV.asStack())
+                        .CWUt(4))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("field_generator_uv")
@@ -710,16 +852,29 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 12))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(FIELD_GENERATOR_UV)
+                .stationResearch(b -> b
+                        .researchStack(FIELD_GENERATOR_ZPM.asStack())
+                        .CWUt(48)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-
-
-        //Sensors Start-------------------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_lv", SENSOR_LV.asStack(), "P G", "PR ", "XPP", 'P', new UnificationEntry(plate, Steel), 'R', new UnificationEntry(rod, Brass), 'G', new UnificationEntry(gem, Quartzite), 'X', CustomTags.LV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_mv", SENSOR_MV.asStack(), "P G", "PR ", "XPP", 'P', new UnificationEntry(plate, Aluminium), 'R', new UnificationEntry(rod, Electrum), 'G', new UnificationEntry(gemFlawless, Emerald), 'X', CustomTags.MV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_hv", SENSOR_HV.asStack(), "P G", "PR ", "XPP", 'P', new UnificationEntry(plate, StainlessSteel), 'R', new UnificationEntry(rod, Chromium), 'G', new UnificationEntry(gem, EnderEye), 'X', CustomTags.HV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_ev", SENSOR_EV.asStack(), "P G", "PR ", "XPP", 'P', new UnificationEntry(plate, Titanium), 'R', new UnificationEntry(rod, Platinum), 'G', QUANTUM_EYE.asStack(), 'X', CustomTags.EV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_iv", SENSOR_IV.asStack(), "P G", "PR ", "XPP", 'P', new UnificationEntry(plate, TungstenSteel), 'R', new UnificationEntry(rod, Iridium), 'G', QUANTUM_STAR.asStack(), 'X', CustomTags.IV_CIRCUITS);
+        // Sensors
+        // Start-------------------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_lv", SENSOR_LV.asStack(), "P G", "PR ", "XPP", 'P',
+                new UnificationEntry(plate, Steel), 'R', new UnificationEntry(rod, Brass), 'G',
+                new UnificationEntry(gem, Quartzite), 'X', CustomTags.LV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_mv", SENSOR_MV.asStack(), "P G", "PR ", "XPP", 'P',
+                new UnificationEntry(plate, Aluminium), 'R', new UnificationEntry(rod, Electrum), 'G',
+                new UnificationEntry(gemFlawless, Emerald), 'X', CustomTags.MV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_hv", SENSOR_HV.asStack(), "P G", "PR ", "XPP", 'P',
+                new UnificationEntry(plate, StainlessSteel), 'R', new UnificationEntry(rod, Chromium), 'G',
+                new UnificationEntry(gem, EnderEye), 'X', CustomTags.HV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_ev", SENSOR_EV.asStack(), "P G", "PR ", "XPP", 'P',
+                new UnificationEntry(plate, Titanium), 'R', new UnificationEntry(rod, Platinum), 'G',
+                QUANTUM_EYE.asStack(), 'X', CustomTags.EV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "sensor_iv", SENSOR_IV.asStack(), "P G", "PR ", "XPP", 'P',
+                new UnificationEntry(plate, TungstenSteel), 'R', new UnificationEntry(rod, Iridium), 'G',
+                QUANTUM_STAR.asStack(), 'X', CustomTags.IV_CIRCUITS);
 
         ASSEMBLER_RECIPES.recipeBuilder("sensor_lv")
                 .inputItems(rod, Brass)
@@ -772,6 +927,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, NiobiumTitanium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 2))
                 .outputItems(SENSOR_LuV)
+                .scannerResearch(b -> b
+                        .researchStack(SENSOR_IV.asStack())
+                        .duration(2400))
                 .duration(600).EUt(6000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("sensor_zpm")
@@ -785,6 +943,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, VanadiumGallium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 4))
                 .outputItems(SENSOR_ZPM)
+                .stationResearch(b -> b
+                        .researchStack(SENSOR_LuV.asStack())
+                        .CWUt(4))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("sensor_uv")
@@ -799,15 +960,29 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 8))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(SENSOR_UV)
+                .stationResearch(b -> b
+                        .researchStack(SENSOR_ZPM.asStack())
+                        .CWUt(48)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
 
-
-        //Emitters Start------------------------------------------------------------------------------------------------
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_lv", EMITTER_LV.asStack(), "CRX", "RGR", "XRC", 'R', new UnificationEntry(rod, Brass), 'C', new UnificationEntry(cableGtSingle, Tin), 'G', new UnificationEntry(gem, Quartzite), 'X', CustomTags.LV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_mv", EMITTER_MV.asStack(), "CRX", "RGR", "XRC", 'R', new UnificationEntry(rod, Electrum), 'C', new UnificationEntry(cableGtSingle, Copper), 'G', new UnificationEntry(gemFlawless, Emerald), 'X', CustomTags.MV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_hv", EMITTER_HV.asStack(), "CRX", "RGR", "XRC", 'R', new UnificationEntry(rod, Chromium), 'C', new UnificationEntry(cableGtSingle, Gold), 'G', new UnificationEntry(gem, EnderEye), 'X', CustomTags.HV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_ev", EMITTER_EV.asStack(), "CRX", "RGR", "XRC", 'R', new UnificationEntry(rod, Platinum), 'C', new UnificationEntry(cableGtSingle, Aluminium), 'G', QUANTUM_EYE.asStack(), 'X', CustomTags.EV_CIRCUITS);
-        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_iv", EMITTER_IV.asStack(), "CRX", "RGR", "XRC", 'R', new UnificationEntry(rod, Iridium), 'C', new UnificationEntry(cableGtSingle, Tungsten), 'G', QUANTUM_STAR.asStack(), 'X', CustomTags.IV_CIRCUITS);
+        // Emitters
+        // Start------------------------------------------------------------------------------------------------
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_lv", EMITTER_LV.asStack(), "CRX", "RGR", "XRC",
+                'R', new UnificationEntry(rod, Brass), 'C', new UnificationEntry(cableGtSingle, Tin), 'G',
+                new UnificationEntry(gem, Quartzite), 'X', CustomTags.LV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_mv", EMITTER_MV.asStack(), "CRX", "RGR", "XRC",
+                'R', new UnificationEntry(rod, Electrum), 'C', new UnificationEntry(cableGtSingle, Copper), 'G',
+                new UnificationEntry(gemFlawless, Emerald), 'X', CustomTags.MV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_hv", EMITTER_HV.asStack(), "CRX", "RGR", "XRC",
+                'R', new UnificationEntry(rod, Chromium), 'C', new UnificationEntry(cableGtSingle, Gold), 'G',
+                new UnificationEntry(gem, EnderEye), 'X', CustomTags.HV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_ev", EMITTER_EV.asStack(), "CRX", "RGR", "XRC",
+                'R', new UnificationEntry(rod, Platinum), 'C', new UnificationEntry(cableGtSingle, Aluminium), 'G',
+                QUANTUM_EYE.asStack(), 'X', CustomTags.EV_CIRCUITS);
+        VanillaRecipeHelper.addShapedRecipe(provider, true, "emitter_iv", EMITTER_IV.asStack(), "CRX", "RGR", "XRC",
+                'R', new UnificationEntry(rod, Iridium), 'C', new UnificationEntry(cableGtSingle, Tungsten), 'G',
+                QUANTUM_STAR.asStack(), 'X', CustomTags.IV_CIRCUITS);
 
         ASSEMBLER_RECIPES.recipeBuilder("emitter_lv")
                 .inputItems(rod, Brass, 4)
@@ -865,6 +1040,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, NiobiumTitanium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 2))
                 .outputItems(EMITTER_LuV)
+                .scannerResearch(b -> b
+                        .researchStack(EMITTER_IV.asStack())
+                        .duration(2400))
                 .duration(600).EUt(6000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("emitter_zpm")
@@ -878,6 +1056,9 @@ public class ComponentRecipes {
                 .inputItems(cableGtSingle, VanadiumGallium, 4)
                 .inputFluids(SolderingAlloy.getFluid(L * 4))
                 .outputItems(EMITTER_ZPM)
+                .stationResearch(b -> b
+                        .researchStack(EMITTER_LuV.asStack())
+                        .CWUt(8))
                 .duration(600).EUt(24000).save(provider);
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder("emitter_uv")
@@ -892,6 +1073,10 @@ public class ComponentRecipes {
                 .inputFluids(SolderingAlloy.getFluid(L * 8))
                 .inputFluids(Naquadria.getFluid(L * 4))
                 .outputItems(EMITTER_UV)
+                .stationResearch(b -> b
+                        .researchStack(EMITTER_ZPM.asStack())
+                        .CWUt(48)
+                        .EUt(VA[ZPM]))
                 .duration(600).EUt(100000).save(provider);
     }
 }

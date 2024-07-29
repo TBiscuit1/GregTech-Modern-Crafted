@@ -1,16 +1,17 @@
 package com.gregtechceu.gtceu.common.recipe;
 
-import com.google.gson.JsonObject;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeCondition;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
-import lombok.NoArgsConstructor;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 
-import javax.annotation.Nonnull;
+import com.google.gson.JsonObject;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author KilaBash
@@ -42,7 +43,7 @@ public class RainingCondition extends RecipeCondition {
     }
 
     @Override
-    public boolean test(@Nonnull GTRecipe recipe, @Nonnull RecipeLogic recipeLogic) {
+    public boolean test(@NotNull GTRecipe recipe, @NotNull RecipeLogic recipeLogic) {
         Level level = recipeLogic.machine.self().getLevel();
         return level != null && level.getRainLevel(1) >= this.level;
     }
@@ -52,7 +53,7 @@ public class RainingCondition extends RecipeCondition {
         return new RainingCondition();
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public JsonObject serialize() {
         JsonObject config = super.serialize();
@@ -61,7 +62,7 @@ public class RainingCondition extends RecipeCondition {
     }
 
     @Override
-    public RecipeCondition deserialize(@Nonnull JsonObject config) {
+    public RecipeCondition deserialize(@NotNull JsonObject config) {
         super.deserialize(config);
         level = GsonHelper.getAsFloat(config, "level", 0);
         return this;
@@ -79,5 +80,4 @@ public class RainingCondition extends RecipeCondition {
         super.toNetwork(buf);
         buf.writeFloat(level);
     }
-
 }

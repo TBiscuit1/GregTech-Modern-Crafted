@@ -12,8 +12,8 @@ import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper;
 import com.gregtechceu.gtceu.data.recipe.builder.GTRecipeBuilder;
 import com.gregtechceu.gtceu.utils.GTUtil;
+
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Consumer;
@@ -25,33 +25,33 @@ import static com.gregtechceu.gtceu.common.data.GTRecipeTypes.*;
 
 public class PartsRecipeHandler {
 
-    private PartsRecipeHandler() {
-    }
+    private PartsRecipeHandler() {}
 
     public static void init(Consumer<FinishedRecipe> provider) {
-        rod.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processStick(tagPrefix, material, property, provider));
-        rodLong.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processLongStick(tagPrefix, material, property, provider));
-        plate.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processPlate(tagPrefix, material, property, provider));
-        plateDouble.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processPlateDouble(tagPrefix, material, property, provider));
-        plateDense.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processPlateDense(tagPrefix, material, property, provider));
+        rod.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processStick);
+        rodLong.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processLongStick);
+        plate.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processPlate);
+        plateDouble.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processPlateDouble);
+        plateDense.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processPlateDense);
 
-        turbineBlade.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processTurbine(tagPrefix, material, property, provider));
-        rotor.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processRotor(tagPrefix, material, property, provider));
-        bolt.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processBolt(tagPrefix, material, property, provider));
-        screw.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processScrew(tagPrefix, material, property, provider));
-        wireFine.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processFineWire(tagPrefix, material, property, provider));
-        foil.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processFoil(tagPrefix, material, property, provider));
-        lens.executeHandler(PropertyKey.GEM, (tagPrefix, material, property) -> processLens(tagPrefix, material, property, provider));
+        turbineBlade.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processTurbine);
+        rotor.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processRotor);
+        bolt.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processBolt);
+        screw.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processScrew);
+        wireFine.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processFineWire);
+        foil.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processFoil);
+        lens.executeHandler(provider, PropertyKey.GEM, PartsRecipeHandler::processLens);
 
-        gear.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processGear(tagPrefix, material, property, provider));
-        gearSmall.executeHandler(PropertyKey.DUST, (tagPrefix, material, property) -> processGear(tagPrefix, material, property, provider));
-        ring.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processRing(tagPrefix, material, property, provider));
-        springSmall.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processSpringSmall(tagPrefix, material, property, provider));
-        spring.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processSpring(tagPrefix, material, property, provider));
-        round.executeHandler(PropertyKey.INGOT, (tagPrefix, material, property) -> processRound(tagPrefix, material, property, provider));
+        gear.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processGear);
+        gearSmall.executeHandler(provider, PropertyKey.DUST, PartsRecipeHandler::processGear);
+        ring.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processRing);
+        springSmall.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processSpringSmall);
+        spring.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processSpring);
+        round.executeHandler(provider, PropertyKey.INGOT, PartsRecipeHandler::processRound);
     }
 
-    public static void processBolt(TagPrefix boltPrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processBolt(TagPrefix boltPrefix, Material material, DustProperty property,
+                                   Consumer<FinishedRecipe> provider) {
         ItemStack boltStack = ChemicalHelper.get(boltPrefix, material);
         ItemStack ingotStack = ChemicalHelper.get(ingot, material);
 
@@ -83,7 +83,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processScrew(TagPrefix screwPrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processScrew(TagPrefix screwPrefix, Material material, DustProperty property,
+                                    Consumer<FinishedRecipe> provider) {
         ItemStack screwStack = ChemicalHelper.get(screwPrefix, material);
 
         LATHE_RECIPES.recipeBuilder("lathe_" + material.getName() + "_bolt_to_screw")
@@ -98,7 +99,8 @@ public class PartsRecipeHandler {
                 'X', new UnificationEntry(bolt, material));
     }
 
-    public static void processFoil(TagPrefix foilPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processFoil(TagPrefix foilPrefix, Material material, IngotProperty property,
+                                   Consumer<FinishedRecipe> provider) {
         if (!material.hasFlag(NO_SMASHING))
             VanillaRecipeHelper.addShapedRecipe(provider, String.format("foil_%s", material.getName()),
                     ChemicalHelper.get(foilPrefix, material, 2),
@@ -139,7 +141,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processFineWire(TagPrefix fineWirePrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processFineWire(TagPrefix fineWirePrefix, Material material, IngotProperty property,
+                                       Consumer<FinishedRecipe> provider) {
         ItemStack fineWireStack = ChemicalHelper.get(fineWirePrefix, material);
 
         if (!ChemicalHelper.get(foil, material).isEmpty())
@@ -163,7 +166,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processGear(TagPrefix gearPrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processGear(TagPrefix gearPrefix, Material material, DustProperty property,
+                                   Consumer<FinishedRecipe> provider) {
         ItemStack stack = ChemicalHelper.get(gearPrefix, material);
         if (gearPrefix == gear && material.hasProperty(PropertyKey.INGOT)) {
             int voltageMultiplier = getVoltageMultiplier(material);
@@ -207,8 +211,10 @@ public class PartsRecipeHandler {
 
         if (material.hasFlag(GENERATE_PLATE) && material.hasFlag(GENERATE_ROD)) {
             if (gearPrefix == gearSmall) {
-                VanillaRecipeHelper.addShapedRecipe(provider, String.format("small_gear_%s", material.getName()), ChemicalHelper.get(gearSmall, material),
-                        " R ", "hPx", " R ", 'R', new UnificationEntry(rod, material), 'P', new UnificationEntry(plate, material));
+                VanillaRecipeHelper.addShapedRecipe(provider, String.format("small_gear_%s", material.getName()),
+                        ChemicalHelper.get(gearSmall, material),
+                        " R ", "hPx", " R ", 'R', new UnificationEntry(rod, material), 'P',
+                        new UnificationEntry(plate, material));
 
                 EXTRUDER_RECIPES.recipeBuilder("extrude_" + material.getName() + "_ingot_to_small_gear")
                         .inputItems(ingot, material)
@@ -243,7 +249,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processLens(TagPrefix lensPrefix, Material material, GemProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processLens(TagPrefix lensPrefix, Material material, GemProperty property,
+                                   Consumer<FinishedRecipe> provider) {
         ItemStack stack = ChemicalHelper.get(lensPrefix, material);
 
         LATHE_RECIPES.recipeBuilder("lathe_" + material.getName() + "_plate_to_lens")
@@ -261,7 +268,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processPlate(TagPrefix platePrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processPlate(TagPrefix platePrefix, Material material, DustProperty property,
+                                    Consumer<FinishedRecipe> provider) {
         if (material.hasFluid()) {
             FLUID_SOLIDFICATION_RECIPES.recipeBuilder("solidify_" + material.getName() + "_to_plate")
                     .notConsumable(GTItems.SHAPE_MOLD_PLATE)
@@ -273,7 +281,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processPlateDouble(TagPrefix doublePrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processPlateDouble(TagPrefix doublePrefix, Material material, IngotProperty property,
+                                          Consumer<FinishedRecipe> provider) {
         if (material.hasFlag(GENERATE_PLATE)) {
             if (!material.hasFlag(NO_SMASHING)) {
                 VanillaRecipeHelper.addShapedRecipe(provider, String.format("plate_double_%s", material.getName()),
@@ -298,7 +307,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processPlateDense(TagPrefix tagPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processPlateDense(TagPrefix tagPrefix, Material material, DustProperty property,
+                                         Consumer<FinishedRecipe> provider) {
         BENDER_RECIPES.recipeBuilder("bend_" + material.getName() + "_plate_to_dense_plate")
                 .inputItems(plate, material, 9)
                 .circuitMeta(9)
@@ -309,16 +319,17 @@ public class PartsRecipeHandler {
 
         if (material.hasProperty(PropertyKey.INGOT)) {
             BENDER_RECIPES.recipeBuilder("bend_" + material.getName() + "_ingot_to_dense_plate")
-                .inputItems(ingot, material, 9)
-                .circuitMeta(9)
-                .outputItems(tagPrefix, material)
-                .duration((int) Math.max(material.getMass() * 9L, 1L))
-                .EUt(96)
-                .save(provider);
+                    .inputItems(ingot, material, 9)
+                    .circuitMeta(9)
+                    .outputItems(tagPrefix, material)
+                    .duration((int) Math.max(material.getMass() * 9L, 1L))
+                    .EUt(96)
+                    .save(provider);
         }
     }
 
-    public static void processRing(TagPrefix ringPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processRing(TagPrefix ringPrefix, Material material, IngotProperty property,
+                                   Consumer<FinishedRecipe> provider) {
         EXTRUDER_RECIPES.recipeBuilder("extrude_" + material.getName() + "_ingot_to_ring")
                 .inputItems(ingot, material)
                 .notConsumable(GTItems.SHAPE_EXTRUDER_RING)
@@ -343,7 +354,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processSpringSmall(TagPrefix springPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processSpringSmall(TagPrefix springPrefix, Material material, IngotProperty property,
+                                          Consumer<FinishedRecipe> provider) {
         VanillaRecipeHelper.addShapedRecipe(provider, String.format("spring_small_%s", material.getName()),
                 ChemicalHelper.get(springSmall, material),
                 " s ", "fRx", 'R', new UnificationEntry(rod, material));
@@ -356,7 +368,8 @@ public class PartsRecipeHandler {
                 .save(provider);
     }
 
-    public static void processSpring(TagPrefix springPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processSpring(TagPrefix springPrefix, Material material, IngotProperty property,
+                                     Consumer<FinishedRecipe> provider) {
         BENDER_RECIPES.recipeBuilder("bend_" + material.getName() + "_long_rod_to_spring")
                 .inputItems(rodLong, material)
                 .outputItems(spring, material)
@@ -370,7 +383,8 @@ public class PartsRecipeHandler {
                 " s ", "fRx", " R ", 'R', new UnificationEntry(rodLong, material));
     }
 
-    public static void processRotor(TagPrefix rotorPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processRotor(TagPrefix rotorPrefix, Material material, IngotProperty property,
+                                    Consumer<FinishedRecipe> provider) {
         ItemStack stack = ChemicalHelper.get(rotorPrefix, material);
         VanillaRecipeHelper.addShapedRecipe(provider, String.format("rotor_%s", material.getName()), stack,
                 "ChC", "SRf", "CdC",
@@ -407,7 +421,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processStick(TagPrefix stickPrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processStick(TagPrefix stickPrefix, Material material, DustProperty property,
+                                    Consumer<FinishedRecipe> provider) {
         if (material.hasProperty(PropertyKey.GEM) || material.hasProperty(PropertyKey.INGOT)) {
             GTRecipeBuilder builder = LATHE_RECIPES.recipeBuilder("lathe_" + material.getName() + "_to_rod")
                     .inputItems(material.hasProperty(PropertyKey.GEM) ? gem : ingot, material)
@@ -439,7 +454,8 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processLongStick(TagPrefix longStickPrefix, Material material, DustProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processLongStick(TagPrefix longStickPrefix, Material material, DustProperty property,
+                                        Consumer<FinishedRecipe> provider) {
         ItemStack stack = ChemicalHelper.get(longStickPrefix, material);
         ItemStack stickStack = ChemicalHelper.get(rod, material);
 
@@ -453,14 +469,16 @@ public class PartsRecipeHandler {
                 GTUtil.copyAmount(2, stickStack),
                 "s", "X", 'X', new UnificationEntry(rodLong, material));
 
-        if(material.hasProperty(PropertyKey.GEM)) {
-            VanillaRecipeHelper.addShapedRecipe(provider, String.format("stick_long_gem_flawless_%s", material.getName()),
+        if (material.hasProperty(PropertyKey.GEM)) {
+            VanillaRecipeHelper.addShapedRecipe(provider,
+                    String.format("stick_long_gem_flawless_%s", material.getName()),
                     stickStack,
                     "sf",
                     "G ",
                     'G', new UnificationEntry(gemFlawless, material));
 
-            VanillaRecipeHelper.addShapedRecipe(provider, String.format("stick_long_gem_exquisite_%s", material.getName()),
+            VanillaRecipeHelper.addShapedRecipe(provider,
+                    String.format("stick_long_gem_exquisite_%s", material.getName()),
                     GTUtil.copyAmount(2, stickStack),
                     "sf", "G ",
                     'G', new UnificationEntry(gemExquisite, material));
@@ -499,9 +517,10 @@ public class PartsRecipeHandler {
         }
     }
 
-    public static void processTurbine(TagPrefix toolPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processTurbine(TagPrefix toolPrefix, Material material, IngotProperty property,
+                                      Consumer<FinishedRecipe> provider) {
         ItemStack rotorStack = GTItems.TURBINE_ROTOR.asStack();
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         TurbineRotorBehaviour.getBehaviour(rotorStack).setPartMaterial(rotorStack, material);
 
         ASSEMBLER_RECIPES.recipeBuilder("assemble_" + material.getName() + "_turbine_blade")
@@ -527,7 +546,8 @@ public class PartsRecipeHandler {
                 'S', new UnificationEntry(screw, material));
     }
 
-    public static void processRound(TagPrefix roundPrefix, Material material, IngotProperty property, Consumer<FinishedRecipe> provider) {
+    public static void processRound(TagPrefix roundPrefix, Material material, IngotProperty property,
+                                    Consumer<FinishedRecipe> provider) {
         if (!material.hasFlag(NO_SMASHING)) {
 
             VanillaRecipeHelper.addShapedRecipe(provider, String.format("round_%s", material.getName()),

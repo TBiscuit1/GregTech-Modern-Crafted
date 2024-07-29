@@ -1,10 +1,13 @@
 package com.gregtechceu.gtceu.common.pipelike.fluidpipe;
 
 import com.gregtechceu.gtceu.common.blockentity.FluidPipeBlockEntity;
+
 import com.lowdragmc.lowdraglib.misc.FluidStorage;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
+
 import net.minecraft.core.Direction;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,7 +97,8 @@ public class PipeTankList implements IFluidTransfer, Iterable<FluidStorage> {
     @Override
     public long fill(FluidStack resource, boolean simulate, boolean notifyChanges) {
         int channel;
-        if (pipe.isBlocked(facing) || resource == null || resource.getAmount() <= 0 || (channel = findChannel(resource)) < 0)
+        if (pipe.isBlocked(facing) || resource == null || resource.getAmount() <= 0 ||
+                (channel = findChannel(resource)) < 0)
             return 0;
 
         return fill(resource, simulate, channel);
@@ -152,20 +156,18 @@ public class PipeTankList implements IFluidTransfer, Iterable<FluidStorage> {
     }
 
     @Override
-    public void restoreFromSnapshot(Object snapshot) {
-
-    }
+    public void restoreFromSnapshot(Object snapshot) {}
 
     @Nullable
     @Override
     public FluidStack drain(FluidStack fluidStack, boolean doDrain) {
-        if (fluidStack == null || fluidStack.getAmount() <= 0) return null;
+        if (fluidStack.isEmpty() || fluidStack.getAmount() <= 0) return FluidStack.empty();
         fluidStack = fluidStack.copy();
         for (FluidStorage tank : tanks) {
             FluidStack drained = tank.drain(fluidStack, doDrain);
             if (!drained.isEmpty()) return drained;
         }
-        return null;
+        return FluidStack.empty();
     }
 
     @Override

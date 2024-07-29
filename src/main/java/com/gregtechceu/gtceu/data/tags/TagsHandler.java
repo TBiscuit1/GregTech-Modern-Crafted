@@ -1,14 +1,16 @@
 package com.gregtechceu.gtceu.data.tags;
 
+import com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterials.Color;
 import com.gregtechceu.gtceu.common.data.GTItems;
-import com.tterrag.registrate.providers.RegistrateTagsProvider;
+
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-
-import  com.gregtechceu.gtceu.api.data.chemical.material.MarkerMaterials.Color;
 import net.minecraft.world.level.material.Fluid;
+
+import com.tterrag.registrate.providers.RegistrateTagsProvider;
 
 import java.util.function.Supplier;
 
@@ -32,7 +34,7 @@ public class TagsHandler {
     }
 
     public static void initFluid(RegistrateTagsProvider<Fluid> provider) {
-        FluidTagLoader.addPlatformSpecificFluidTags(provider);
+        FluidTagLoader.init(provider);
     }
 
     public static void initEntity(RegistrateTagsProvider<EntityType<?>> provider) {
@@ -42,12 +44,17 @@ public class TagsHandler {
     public static void initExtraUnificationEntries() {
         registerUnificationItems(ingot, Clay, Items.CLAY_BALL);
 
-        registerUnificationItems(lens, Color.White, new Supplier[]{GTItems.MATERIAL_ITEMS.get(lens, Glass), GTItems.MATERIAL_ITEMS.get(lens, NetherStar)});
-        registerUnificationItems(lens, Color.LightBlue, GTItems.MATERIAL_ITEMS.get(lens, Diamond));
-        registerUnificationItems(lens, Color.Red, GTItems.MATERIAL_ITEMS.get(lens, Ruby));
-        registerUnificationItems(lens, Color.Green, GTItems.MATERIAL_ITEMS.get(lens, Emerald));
-        registerUnificationItems(lens, Color.Blue, GTItems.MATERIAL_ITEMS.get(lens, Sapphire));
-        
+        registerUnificationItems(lens, Color.White, new Supplier[] { GTItems.MATERIAL_ITEMS.get(lens, Glass),
+                GTItems.MATERIAL_ITEMS.get(lens, NetherStar) });
+        registerUnificationItems(lens, Color.LightBlue,
+                (Supplier<? extends ItemLike>) GTItems.MATERIAL_ITEMS.get(lens, Diamond));
+        registerUnificationItems(lens, Color.Red,
+                (Supplier<? extends ItemLike>) GTItems.MATERIAL_ITEMS.get(lens, Ruby));
+        registerUnificationItems(lens, Color.Green,
+                (Supplier<? extends ItemLike>) GTItems.MATERIAL_ITEMS.get(lens, Emerald));
+        registerUnificationItems(lens, Color.Blue,
+                (Supplier<? extends ItemLike>) GTItems.MATERIAL_ITEMS.get(lens, Sapphire));
+
         registerUnificationItems(dye, Color.Black, Items.BLACK_DYE);
         registerUnificationItems(dye, Color.Red, Items.RED_DYE);
         registerUnificationItems(dye, Color.Green, Items.GREEN_DYE);

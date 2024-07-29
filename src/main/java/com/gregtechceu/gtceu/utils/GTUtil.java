@@ -1,23 +1,35 @@
 package com.gregtechceu.gtceu.utils;
 
+import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys;
+import com.gregtechceu.gtceu.api.item.tool.GTToolType;
+import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.data.recipe.CustomTags;
+
 import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.side.fluid.FluidHelper;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.FluidTransferHelper;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
-import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,11 +39,14 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.Tags;
+
+import com.google.common.math.LongMath;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.datafixers.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -39,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey.HAZARD;
 
 /**
  * @author KilaBash
@@ -129,7 +146,6 @@ public class GTUtil {
         return null;
     }
 
-
     public static float getExplosionPower(long voltage) {
         return getTierByVoltage(voltage) + 1;
     }
@@ -138,9 +154,9 @@ public class GTUtil {
      * @param array Array sorted with natural order
      * @param value Value to search for
      * @return Index of the nearest value lesser or equal than {@code value},
-     * or {@code -1} if there's no entry matching the condition
+     *         or {@code -1} if there's no entry matching the condition
      */
-    public static int nearestLesserOrEqual(@Nonnull long[] array, long value) {
+    public static int nearestLesserOrEqual(@NotNull long[] array, long value) {
         int low = 0, high = array.length - 1;
         while (true) {
             int median = (low + high) / 2;
@@ -158,9 +174,9 @@ public class GTUtil {
      * @param array Array sorted with natural order
      * @param value Value to search for
      * @return Index of the nearest value lesser than {@code value},
-     * or {@code -1} if there's no entry matching the condition
+     *         or {@code -1} if there's no entry matching the condition
      */
-    public static int nearestLesser(@Nonnull long[] array, long value) {
+    public static int nearestLesser(@NotNull long[] array, long value) {
         int low = 0, high = array.length - 1;
         while (true) {
             int median = (low + high) / 2;
@@ -176,19 +192,33 @@ public class GTUtil {
 
     /**
      * @return Lowest tier of the voltage that can handle {@code voltage}; that is,
-     * a voltage with value greater than equal than {@code voltage}. If there's no
-     * tier that can handle it, {@code MAX} is returned.
+     *         a voltage with value greater than equal than {@code voltage}. If there's no
+     *         tier that can handle it, {@code MAX} is returned.
      */
     public static byte getTierByVoltage(long voltage) {
         // Yes, yes we do need UHV+.
         return (byte) Math.min(GTValues.MAX, nearestLesser(GTValues.V, voltage) + 1);
     }
 
+    public static int getFakeVoltageTier(long voltage) {
+        long a = voltage;
+        int b = 0;
+        while (a / 4L >= 8L) {
+            b++;
+            a /= 4L;
+        }
+        return b;
+    }
+
+    public static long getVoltageFromFakeTier(int tier) {
+        return LongMath.pow(4L, tier + 1) * 2;
+    }
+
     /**
      * Ex: This method turns both 1024 and 512 into HV.
      *
      * @return the highest voltage tier with value below or equal to {@code voltage}, or
-     * {@code ULV} if there's no tier below
+     *         {@code ULV} if there's no tier below
      */
     public static byte getFloorTierByVoltage(long voltage) {
         return (byte) Math.max(GTValues.ULV, nearestLesserOrEqual(GTValues.V, voltage));
@@ -272,7 +302,8 @@ public class GTUtil {
     public static boolean isShiftDown() {
         if (LDLib.isClient()) {
             var id = Minecraft.getInstance().getWindow().getWindow();
-            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT);
+            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT) ||
+                    InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_SHIFT);
         }
         return false;
     }
@@ -280,7 +311,8 @@ public class GTUtil {
     public static boolean isCtrlDown() {
         if (LDLib.isClient()) {
             var id = Minecraft.getInstance().getWindow().getWindow();
-            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_CONTROL);
+            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_CONTROL) ||
+                    InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_CONTROL);
         }
         return false;
     }
@@ -288,17 +320,20 @@ public class GTUtil {
     public static boolean isAltDown() {
         if (LDLib.isClient()) {
             var id = Minecraft.getInstance().getWindow().getWindow();
-            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_ALT) || InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_ALT);
+            return InputConstants.isKeyDown(id, GLFW.GLFW_KEY_LEFT_ALT) ||
+                    InputConstants.isKeyDown(id, GLFW.GLFW_KEY_RIGHT_ALT);
         }
         return false;
     }
 
     public static boolean isFluidStackAmountDivisible(FluidStack fluidStack, int divisor) {
-        return fluidStack.getAmount() % divisor == 0 && fluidStack.getAmount() % divisor != fluidStack.getAmount() && fluidStack.getAmount() / divisor != 0;
+        return fluidStack.getAmount() % divisor == 0 && fluidStack.getAmount() % divisor != fluidStack.getAmount() &&
+                fluidStack.getAmount() / divisor != 0;
     }
 
     public static boolean isItemStackCountDivisible(ItemStack itemStack, int divisor) {
-        return itemStack.getCount() % divisor == 0 && itemStack.getCount() % divisor != itemStack.getCount() && itemStack.getCount() / divisor != 0;
+        return itemStack.getCount() % divisor == 0 && itemStack.getCount() % divisor != itemStack.getCount() &&
+                itemStack.getCount() / divisor != 0;
     }
 
     public static int getItemBurnTime(Item item) {
@@ -310,20 +345,16 @@ public class GTUtil {
             return -1;
         }
 
-        if (biome.is(BiomeTags.IS_DEEP_OCEAN)
-            || biome.is(BiomeTags.IS_OCEAN)
-            || biome.is(BiomeTags.IS_BEACH)
-            || biome.is(BiomeTags.IS_RIVER)) {
+        if (biome.is(BiomeTags.IS_DEEP_OCEAN) || biome.is(BiomeTags.IS_OCEAN) || biome.is(BiomeTags.IS_BEACH) ||
+                biome.is(BiomeTags.IS_RIVER)) {
             return FluidHelper.getBucket();
-        } else if (biome.is(Tags.Biomes.IS_SWAMP)
-            || biome.is(Tags.Biomes.IS_WET)) {
+        } else if (biome.is(Tags.Biomes.IS_SWAMP) || biome.is(Tags.Biomes.IS_WET)) {
             return FluidHelper.getBucket() * 4 / 5;
         } else if (biome.is(BiomeTags.IS_JUNGLE)) {
             return FluidHelper.getBucket() * 35 / 100;
         } else if (biome.is(Tags.Biomes.IS_SNOWY)) {
             return FluidHelper.getBucket() * 3 / 10;
-        } else if (biome.is(Tags.Biomes.IS_PLAINS)
-            || biome.is(BiomeTags.IS_FOREST)) {
+        } else if (biome.is(Tags.Biomes.IS_PLAINS) || biome.is(BiomeTags.IS_FOREST)) {
             return FluidHelper.getBucket() / 4;
         } else if (biome.is(Tags.Biomes.IS_COLD)) {
             return FluidHelper.getBucket() * 175 / 1000;
@@ -343,9 +374,8 @@ public class GTUtil {
         for (DyeColor dyeColor : DyeColor.values()) {
             float[] c2 = GradientUtil.getRGB(dyeColor.getTextColor());
 
-            double distance = (c[0] - c2[0]) * (c[0] - c2[0])
-                    + (c[1] - c2[1]) * (c[1] - c2[1])
-                    + (c[2] - c2[2]) * (c[2] - c2[2]);
+            double distance = (c[0] - c2[0]) * (c[0] - c2[0]) + (c[1] - c2[1]) * (c[1] - c2[1]) +
+                    (c[2] - c2[2]) * (c[2] - c2[2]);
 
             distances.put(distance, dyeColor);
         }
@@ -369,7 +399,7 @@ public class GTUtil {
      * @return the correct "molten" fluid for a material
      */
     @Nullable
-    public static Fluid getMoltenFluid(@Nonnull Material material) {
+    public static Fluid getMoltenFluid(@NotNull Material material) {
         if (material.hasProperty(PropertyKey.ALLOY_BLAST))
             return material.getProperty(PropertyKey.FLUID).getStorage().get(FluidStorageKeys.MOLTEN);
         if (!TagPrefix.ingotHot.doGenerateItem(material) && material.hasProperty(PropertyKey.FLUID))
@@ -399,16 +429,96 @@ public class GTUtil {
         if (!world.canSeeSky(blockPos.above())) {
             return false;
         }
+
         Biome biome = world.getBiome(blockPos.above()).value();
         if (world.isRaining()) {
             if (biome.warmEnoughToRain(blockPos.above()) || biome.coldEnoughToSnow(blockPos.above())) {
                 return false;
             }
         }
+
         if (world.getBiome(blockPos.above()).is(BiomeTags.IS_END)) {
             return false;
         }
+
         return world.isDay();
     }
 
+    public static void appendHazardTooltips(Material material, List<Component> tooltipComponents) {
+        if (!ConfigHolder.INSTANCE.gameplay.hazardsEnabled || !material.hasProperty(HAZARD)) return;
+
+        if (GTUtil.isShiftDown()) {
+            tooltipComponents.add(Component.translatable("gtceu.medical_condition.description_shift"));
+            tooltipComponents.add(Component
+                    .translatable("gtceu.medical_condition." + material.getProperty(HAZARD).condition.name));
+            tooltipComponents.add(Component.translatable("gtceu.hazard_trigger.description"));
+            tooltipComponents.add(Component
+                    .translatable("gtceu.hazard_trigger." + material.getProperty(HAZARD).hazardTrigger.name()));
+            return;
+        }
+        tooltipComponents.add(Component.translatable("gtceu.medical_condition.description"));
+    }
+
+    public static CompoundTag saveItemStack(ItemStack itemStack, CompoundTag compoundTag) {
+        ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        compoundTag.putString("id", resourceLocation.toString());
+        compoundTag.putInt("Count", itemStack.getCount());
+        if (itemStack.getTag() != null) {
+            compoundTag.put("tag", itemStack.getTag().copy());
+        }
+
+        return compoundTag;
+    }
+
+    public static ItemStack loadItemStack(CompoundTag compoundTag) {
+        try {
+            Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
+            int count = compoundTag.getInt("Count");
+            ItemStack stack = new ItemStack(item, count);
+            if (compoundTag.contains("tag", Tag.TAG_COMPOUND)) {
+                stack.setTag(compoundTag.getCompound("tag"));
+                if (stack.getTag() != null) {
+                    stack.getItem().verifyTagAfterLoad(stack.getTag());
+                }
+            }
+
+            if (stack.getItem().canBeDepleted()) {
+                stack.setDamageValue(stack.getDamageValue());
+            }
+            return stack;
+        } catch (RuntimeException var2) {
+            GTCEu.LOGGER.debug("Tried to load invalid item: {}", compoundTag, var2);
+            return ItemStack.EMPTY;
+        }
+    }
+
+    public static Tuple<ItemStack, MutableComponent> getMaintenanceText(byte flag) {
+        return switch (flag) {
+            case 0 -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.WRENCH),
+                    Component.translatable("gtceu.top.maintenance.wrench"));
+            case 1 -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.SCREWDRIVER),
+                    Component.translatable("gtceu.top.maintenance.screwdriver"));
+            case 2 -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.SOFT_MALLET),
+                    Component.translatable("gtceu.top.maintenance.soft_mallet"));
+            case 3 -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.HARD_HAMMER),
+                    Component.translatable("gtceu.top.maintenance.hard_hammer"));
+            case 4 -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.WIRE_CUTTER),
+                    Component.translatable("gtceu.top.maintenance.wire_cutter"));
+            default -> new Tuple<>(ToolItemHelper.getToolItem(GTToolType.CROWBAR),
+                    Component.translatable("gtceu.top.maintenance.crowbar"));
+        };
+    }
+
+    public static void addPotionTooltip(List<Pair<MobEffectInstance, Float>> effects, List<Component> list) {
+        list.add(Component.translatable("gtceu.tooltip.potion.header"));
+        effects.forEach(pair -> {
+            var effect = pair.getFirst();
+            float probability = pair.getSecond();
+            list.add(Component.translatable("gtceu.tooltip.potion.each",
+                    Component.translatable(effect.getDescriptionId()),
+                    Component.translatable("enchantment.level." + (effect.getAmplifier() + 1)),
+                    effect.getDuration(),
+                    100 * probability));
+        });
+    }
 }

@@ -4,19 +4,19 @@ import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.pattern.BlockPattern;
 import com.gregtechceu.gtceu.api.pattern.MultiblockShapeInfo;
-import com.mojang.datafixers.util.Function4;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import net.minecraft.core.BlockPos;
+
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.function.TriFunction;
 
-import javax.annotation.Nullable;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import org.apache.commons.lang3.function.TriFunction;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -27,6 +27,10 @@ import java.util.function.Supplier;
  * @implNote MultiblockMachineDefinition
  */
 public class MultiblockMachineDefinition extends MachineDefinition {
+
+    @Getter
+    @Setter
+    private boolean generator;
     @Setter
     @Getter
     @NonNull
@@ -34,6 +38,14 @@ public class MultiblockMachineDefinition extends MachineDefinition {
     @Setter
     @Getter
     private Supplier<List<MultiblockShapeInfo>> shapes;
+    /** Whether this multi can be rotated or face upwards. */
+    @Getter
+    @Setter
+    private boolean allowExtendedFacing;
+    /** Set this to false only if your multiblock is set up such that it could have a wall-shared controller. */
+    @Getter
+    @Setter
+    private boolean allowFlip;
     @Setter
     @Getter
     @Nullable
@@ -41,9 +53,11 @@ public class MultiblockMachineDefinition extends MachineDefinition {
     @Setter
     @Getter
     private Comparator<IMultiPart> partSorter;
-    @Getter @Setter
+    @Getter
+    @Setter
     private TriFunction<IMultiController, IMultiPart, Direction, BlockState> partAppearance;
-    @Getter @Setter
+    @Getter
+    @Setter
     private BiConsumer<IMultiController, List<Component>> additionalDisplay;
 
     protected MultiblockMachineDefinition(ResourceLocation id) {
@@ -62,7 +76,8 @@ public class MultiblockMachineDefinition extends MachineDefinition {
         return repetitionDFS(structurePattern, new ArrayList<>(), aisleRepetitions, new Stack<>());
     }
 
-    private List<MultiblockShapeInfo> repetitionDFS(BlockPattern pattern, List<MultiblockShapeInfo> pages, int[][] aisleRepetitions, Stack<Integer> repetitionStack) {
+    private List<MultiblockShapeInfo> repetitionDFS(BlockPattern pattern, List<MultiblockShapeInfo> pages,
+                                                    int[][] aisleRepetitions, Stack<Integer> repetitionStack) {
         if (repetitionStack.size() == aisleRepetitions.length) {
             int[] repetition = new int[repetitionStack.size()];
             for (int i = 0; i < repetitionStack.size(); i++) {
@@ -70,7 +85,8 @@ public class MultiblockMachineDefinition extends MachineDefinition {
             }
             pages.add(new MultiblockShapeInfo(pattern.getPreview(repetition)));
         } else {
-            for (int i = aisleRepetitions[repetitionStack.size()][0]; i <= aisleRepetitions[repetitionStack.size()][1]; i++) {
+            for (int i = aisleRepetitions[repetitionStack.size()][0]; i <=
+                    aisleRepetitions[repetitionStack.size()][1]; i++) {
                 repetitionStack.push(i);
                 repetitionDFS(pattern, pages, aisleRepetitions, repetitionStack);
                 repetitionStack.pop();

@@ -1,18 +1,17 @@
 package com.gregtechceu.gtceu.api.capability.recipe;
 
 import com.google.common.collect.Table;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
-
 
 public interface IRecipeCapabilityHolder {
 
     default boolean hasProxies() {
-        return !getCapabilitiesProxy().isEmpty() && !getCapabilitiesProxy().isEmpty();
+        return !getCapabilitiesProxy().isEmpty();
     }
 
-    @Nonnull
+    @NotNull
     Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> getCapabilitiesProxy();
 
     /**
@@ -22,5 +21,4 @@ public interface IRecipeCapabilityHolder {
     default int getChanceTier() {
         return 0;
     }
-
 }

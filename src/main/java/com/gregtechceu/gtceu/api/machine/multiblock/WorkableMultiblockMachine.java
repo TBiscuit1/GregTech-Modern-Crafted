@@ -1,7 +1,5 @@
 package com.gregtechceu.gtceu.api.machine.multiblock;
 
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
 import com.gregtechceu.gtceu.api.block.ActiveBlock;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
@@ -16,22 +14,28 @@ import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
+
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.core.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * @author KilaBash
@@ -40,24 +44,36 @@ import java.util.*;
  */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public abstract class WorkableMultiblockMachine extends MultiblockControllerMachine implements IWorkableMultiController, IMufflableMachine {
+public abstract class WorkableMultiblockMachine extends MultiblockControllerMachine
+                                                implements IWorkableMultiController, IMufflableMachine {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(WorkableMultiblockMachine.class, MultiblockControllerMachine.MANAGED_FIELD_HOLDER);
-    @Nullable @Getter @Setter
+    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
+            WorkableMultiblockMachine.class, MultiblockControllerMachine.MANAGED_FIELD_HOLDER);
+    @Nullable
+    @Getter
+    @Setter
     private ICleanroomProvider cleanroom;
-    @Getter @Persisted @DescSynced
+    @Getter
+    @Persisted
+    @DescSynced
     public final RecipeLogic recipeLogic;
     @Getter
     private final GTRecipeType[] recipeTypes;
-    @Getter @Setter @Persisted
+    @Getter
+    @Setter
+    @Persisted
     private int activeRecipeType;
     @Getter
     protected final Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilitiesProxy;
     protected final List<ISubscription> traitSubscriptions;
-    @Getter @Setter @Persisted @DescSynced
+    @Getter
+    @Setter
+    @Persisted
+    @DescSynced
     protected boolean isMuffled;
     protected boolean previouslyMuffled = true;
-    @Nullable @Getter
+    @Nullable
+    @Getter
     protected LongSet activeBlocks;
 
     public WorkableMultiblockMachine(IMachineBlockEntity holder, Object... args) {
@@ -65,12 +81,12 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         this.recipeTypes = getDefinition().getRecipeTypes();
         this.activeRecipeType = 0;
         this.recipeLogic = createRecipeLogic(args);
-        this.capabilitiesProxy = Tables.newCustomTable(new EnumMap<>(IO.class), HashMap::new);
+        this.capabilitiesProxy = Tables.newCustomTable(new EnumMap<>(IO.class), IdentityHashMap::new);
         this.traitSubscriptions = new ArrayList<>();
     }
 
     //////////////////////////////////////
-    //*****     Initialization    ******//
+    // ***** Initialization ******//
     //////////////////////////////////////
 
     @Override
@@ -91,7 +107,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
     }
 
     //////////////////////////////////////
-    //***    Multiblock LifeCycle    ***//
+    // *** Multiblock LifeCycle ***//
     //////////////////////////////////////
     @Override
     public void onStructureFormed() {
@@ -104,7 +120,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
         for (IMultiPart part : getParts()) {
             IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
-            if(io == IO.NONE) continue;
+            if (io == IO.NONE) continue;
             for (var handler : part.getRecipeHandlers()) {
                 // If IO not compatible
                 if (io != IO.BOTH && handler.getHandlerIO() != IO.BOTH && io != handler.getHandlerIO()) continue;
@@ -138,7 +154,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         capabilitiesProxy.clear();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
-        //reset recipe Logic
+        // reset recipe Logic
         recipeLogic.resetRecipeLogic();
     }
 
@@ -157,7 +173,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
     }
 
     //////////////////////////////////////
-    //******     RECIPE LOGIC    *******//
+    // ****** RECIPE LOGIC *******//
     //////////////////////////////////////
 
     @Override
@@ -224,20 +240,27 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         for (IMultiPart part : getParts()) {
             part.afterWorking(this);
         }
+        IWorkableMultiController.super.afterWorking();
     }
 
     @Override
-    public void beforeWorking() {
+    public boolean beforeWorking(@Nullable GTRecipe recipe) {
         for (IMultiPart part : getParts()) {
-            part.beforeWorking(this);
+            if (!part.beforeWorking(this)) {
+                return false;
+            }
         }
+        return IWorkableMultiController.super.beforeWorking(recipe);
     }
 
     @Override
-    public void onWorking() {
+    public boolean onWorking() {
         for (IMultiPart part : getParts()) {
-            part.onWorking(this);
+            if (!part.onWorking(this)) {
+                return false;
+            }
         }
+        return IWorkableMultiController.super.onWorking();
     }
 
     @Override
@@ -245,9 +268,20 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         for (IMultiPart part : getParts()) {
             part.onWaiting(this);
         }
+        IWorkableMultiController.super.onWaiting();
     }
 
-    @Nonnull
+    @Override
+    public void setWorkingEnabled(boolean isWorkingAllowed) {
+        if (!isWorkingAllowed) {
+            for (IMultiPart part : getParts()) {
+                part.onPaused(this);
+            }
+        }
+        IWorkableMultiController.super.setWorkingEnabled(isWorkingAllowed);
+    }
+
+    @NotNull
     public GTRecipeType getRecipeType() {
         return recipeTypes[activeRecipeType];
     }

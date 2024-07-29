@@ -13,16 +13,17 @@ import com.gregtechceu.gtceu.api.fluids.FluidState;
 import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.data.recipe.misc.alloyblast.CustomAlloyBlastRecipeProducer;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-import javax.annotation.Nonnull;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 /**
  * Listen to PostMaterialEvent instead of doing this directly because it's a lot cleaner this way.
  */
-//@Mod.EventBusSubscriber(modid = GTCEu.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+// @Mod.EventBusSubscriber(modid = GTCEu.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class AlloyBlastPropertyAddition {
 
     @SubscribeEvent
@@ -40,7 +41,7 @@ public class AlloyBlastPropertyAddition {
                 .setRecipeProducer(new CustomAlloyBlastRecipeProducer(-1, -1, 16));
     }
 
-    public static void addAlloyBlastProperty(@Nonnull Material material) {
+    public static void addAlloyBlastProperty(@NotNull Material material) {
         final List<MaterialStack> components = material.getMaterialComponents();
         // ignore materials which are not alloys
         if (components.size() < 2) return;
@@ -56,10 +57,11 @@ public class AlloyBlastPropertyAddition {
         }
 
         material.setProperty(PropertyKey.ALLOY_BLAST, new AlloyBlastProperty(material.getBlastTemperature()));
-        material.getProperty(PropertyKey.FLUID).getStorage().enqueueRegistration(FluidStorageKeys.MOLTEN, new FluidBuilder().state(FluidState.LIQUID));
+        material.getProperty(PropertyKey.FLUID).getStorage().enqueueRegistration(FluidStorageKeys.MOLTEN,
+                new FluidBuilder().state(FluidState.LIQUID));
     }
 
-    private static boolean isMaterialStackFluidOnly(@Nonnull MaterialStack ms) {
+    private static boolean isMaterialStackFluidOnly(@NotNull MaterialStack ms) {
         return !ms.material().hasProperty(PropertyKey.DUST) && ms.material().hasProperty(PropertyKey.FLUID);
     }
 }

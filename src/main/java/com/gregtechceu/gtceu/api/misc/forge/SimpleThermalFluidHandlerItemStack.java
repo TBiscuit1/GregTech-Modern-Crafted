@@ -1,26 +1,30 @@
 package com.gregtechceu.gtceu.api.misc.forge;
 
 import com.gregtechceu.gtceu.api.capability.IThermalFluidHandlerItemStack;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStackSimple;
-import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author KilaBash
  * @date 2023/2/22
  * @implNote FluidHandlerHelperImpl
  */
-public class SimpleThermalFluidHandlerItemStack extends FluidHandlerItemStackSimple implements IThermalFluidHandlerItemStack {
+public class SimpleThermalFluidHandlerItemStack extends FluidHandlerItemStackSimple
+                                                implements IThermalFluidHandlerItemStack {
+
     public final int maxFluidTemperature;
     private final boolean gasProof;
     private final boolean acidProof;
     private final boolean cryoProof;
     private final boolean plasmaProof;
 
-    public SimpleThermalFluidHandlerItemStack(@Nonnull ItemStack container, int capacity, int maxFluidTemperature, boolean gasProof, boolean acidProof, boolean cryoProof, boolean plasmaProof) {
+    public SimpleThermalFluidHandlerItemStack(@NotNull ItemStack container, int capacity, int maxFluidTemperature,
+                                              boolean gasProof, boolean acidProof, boolean cryoProof,
+                                              boolean plasmaProof) {
         super(container, capacity);
         this.maxFluidTemperature = maxFluidTemperature;
         this.gasProof = gasProof;

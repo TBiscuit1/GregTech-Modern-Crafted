@@ -2,9 +2,9 @@ package com.gregtechceu.gtceu.api.item.component;
 
 import com.gregtechceu.gtceu.api.data.chemical.material.Material;
 import com.gregtechceu.gtceu.api.data.chemical.material.properties.PropertyKey;
-import com.gregtechceu.gtceu.api.item.ComponentItem;
+import com.gregtechceu.gtceu.api.item.IComponentItem;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
-import com.lowdragmc.lowdraglib.utils.LocalizationUtils;
+
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -15,8 +15,9 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 /**
@@ -51,11 +52,11 @@ public interface IMaterialPartItem extends IItemComponent, IDurabilityBar, IAddI
         return material;
     }
 
-    default void setPartMaterial(ItemStack itemStack, @Nonnull Material material) {
+    default void setPartMaterial(ItemStack itemStack, @NotNull Material material) {
         if (!material.hasProperty(PropertyKey.INGOT))
             throw new IllegalArgumentException("Part material must have an Ingot!");
         var compound = getOrCreatePartStatsTag(itemStack);
-        compound.putString("Material", material.getName());
+        compound.putString("Material", material.getResourceLocation().toString());
     }
 
     default int getPartDamage(ItemStack itemStack) {
@@ -72,24 +73,28 @@ public interface IMaterialPartItem extends IItemComponent, IDurabilityBar, IAddI
     }
 
     @Override
-    default String getItemStackDisplayName(ItemStack itemStack) {
-        var material = getPartMaterial(itemStack);
-        return LocalizationUtils.format(itemStack.getItem().getDescriptionId()) + "-" +LocalizationUtils.format(material.getUnlocalizedName());
+    @Nullable
+    default Component getItemName(ItemStack stack) {
+        var material = getPartMaterial(stack);
+        return Component.translatable(stack.getDescriptionId(), material.getLocalizedName());
     }
 
     @Override
-    default void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+    default void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level,
+                                 List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         var material = getPartMaterial(stack);
         var maxDurability = getPartMaxDurability(stack);
         var damage = getPartDamage(stack);
-        tooltipComponents.add(Component.translatable("metaitem.tool.tooltip.durability", maxDurability - damage, maxDurability));
-        tooltipComponents.add(Component.translatable("metaitem.tool.tooltip.primary_material", material.getLocalizedName()));
+        tooltipComponents
+                .add(Component.translatable("metaitem.tool.tooltip.durability", maxDurability - damage, maxDurability));
+        tooltipComponents
+                .add(Component.translatable("metaitem.tool.tooltip.primary_material", material.getLocalizedName()));
     }
 
     @OnlyIn(Dist.CLIENT)
     static ItemColor getItemStackColor() {
         return (itemStack, i) -> {
-            if (itemStack.getItem() instanceof ComponentItem componentItem) {
+            if (itemStack.getItem() instanceof IComponentItem componentItem) {
                 for (IItemComponent component : componentItem.getComponents()) {
                     if (component instanceof IMaterialPartItem materialPartItem) {
                         return materialPartItem.getPartMaterial(itemStack).getMaterialARGB();
@@ -101,9 +106,9 @@ public interface IMaterialPartItem extends IItemComponent, IDurabilityBar, IAddI
     }
 
     @Override
-    default int getDurabilityForDisplay(ItemStack itemStack) {
+    default float getDurabilityForDisplay(ItemStack itemStack) {
         var maxDurability = getPartMaxDurability(itemStack);
-        return (maxDurability - getPartDamage(itemStack)) / maxDurability;
+        return (float) (maxDurability - getPartDamage(itemStack)) / maxDurability;
     }
 
     @Override

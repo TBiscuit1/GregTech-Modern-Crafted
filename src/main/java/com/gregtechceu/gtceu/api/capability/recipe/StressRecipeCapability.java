@@ -2,7 +2,6 @@ package com.gregtechceu.gtceu.api.capability.recipe;
 
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 import com.gregtechceu.gtceu.api.recipe.content.SerializerFloat;
-import com.gregtechceu.gtceu.api.recipe.lookup.AbstractMapIngredient;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +16,7 @@ public class StressRecipeCapability extends RecipeCapability<Float> {
     public final static StressRecipeCapability CAP = new StressRecipeCapability();
 
     protected StressRecipeCapability() {
-        super("su", 0xFF77A400, SerializerFloat.INSTANCE);
+        super("su", 0xFF77A400, false, 4, SerializerFloat.INSTANCE);
     }
 
     @Override

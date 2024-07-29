@@ -2,17 +2,18 @@ package com.gregtechceu.gtceu.api.transfer.fluid;
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.side.fluid.IFluidTransfer;
+
 import net.minecraft.MethodsReturnNonnullByDefault;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class FluidTransferDelegate implements IFluidTransfer {
+
     public IFluidTransfer delegate;
 
     public FluidTransferDelegate(IFluidTransfer delegate) {
@@ -23,11 +24,9 @@ public abstract class FluidTransferDelegate implements IFluidTransfer {
         this.delegate = delegate;
     }
 
-
     //////////////////////////////////////
-    //******    OVERRIDE THESE    ******//
+    // ****** OVERRIDE THESE ******//
     //////////////////////////////////////
-
 
     @Override
     public int getTanks() {
@@ -35,7 +34,7 @@ public abstract class FluidTransferDelegate implements IFluidTransfer {
     }
 
     @Override
-    @Nonnull
+    @NotNull
     public FluidStack getFluidInTank(int tank) {
         return delegate.getFluidInTank(tank);
     }
@@ -69,7 +68,7 @@ public abstract class FluidTransferDelegate implements IFluidTransfer {
 
     @Override
     @ApiStatus.Internal
-    @Nonnull
+    @NotNull
     public FluidStack drain(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
         return delegate.drain(tank, resource, simulate, notifyChanges);
     }
@@ -81,7 +80,7 @@ public abstract class FluidTransferDelegate implements IFluidTransfer {
 
     @Override
     @ApiStatus.Internal
-    @Nonnull
+    @NotNull
     public Object createSnapshot() {
         return delegate.createSnapshot();
     }
