@@ -1296,7 +1296,7 @@ public class GTMachines {
                                                     .convertTemperature(coilMachine.getCoilType().getCoilTemperature() +
                                                             100L * Math.max(0, coilMachine.getTier() - GTValues.MV)) +
                                                     "K")
-                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.RED))))
+                                    .setStyle(Style.EMPTY.withColor(ChatFormatting.RED))));
                 }
             })
             .compassSections(GTCompassSections.TIER[MV])
